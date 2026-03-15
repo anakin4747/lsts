@@ -130,7 +130,10 @@ lsp_notify() {
 # Call from bats setup().
 # LSP_CMD must be set to the server executable before calling.
 lsp_start() {
-	: "${LSP_CMD:?LSP_CMD must be set to the language server command}"
+	: "${LSP_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
+	: "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
+	: "${LSTS_LANG_ID:?language Id not set. use lsts_set_langId to set the language Id}"
+
 	_LSTS_ID=0
 	coproc LSP { ${LSP_CMD}; }
 	LSP_READ_FD=${LSP[0]}
