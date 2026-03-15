@@ -2,7 +2,7 @@
 
 load '../lsts'
 
-LSP_CMD="kconfig-language-server"
+lsts_set_cmd "kconfig-language-server"
 LSTS_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures" && pwd)"
 
 setup() {
@@ -25,8 +25,6 @@ teardown() {
     local err
     err="$(echo "$LSP_RESPONSE" | jq -r '.error')"
     [[ "$err" == "null" ]]
-
-    kill -0 "${LSP_PID}"
 }
 
 @test "kconfig: hover on 'config' keyword returns markdown documentation" {

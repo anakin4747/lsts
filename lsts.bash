@@ -25,6 +25,19 @@
 #       echo "$LSP_RESPONSE" | jq -e '.result.contents'
 #   }
 
+lsts_set_cmd() {
+    [[ $# == 1 ]] || {
+        echo "lsts_set_cmd requires the command to start the target language server"
+        exit 1
+    }
+    ls="$(echo "$1" | awk '{print $1}')"
+    command -v "$ls" > /dev/null || {
+        echo "lsts_set_cmd cannot find the target language server: '$ls'"
+        exit 1
+    }
+    LSP_CMD="$1"
+}
+
 # ---------------------------------------------------------------------------
 # Transport — JSON-RPC framing and low-level send/recv
 #
