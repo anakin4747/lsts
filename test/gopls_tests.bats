@@ -29,10 +29,5 @@ teardown() {
 }
 
 @test "gopls: hover on 'fmt' package returns documentation" {
-    local fixture="${LSTS_ROOT}/main.go"
-    local uri="file://${fixture}"
-
-    lsp_hover "$uri" 2 8
-
-    echo "$LSTS_RESPONSE" | jq -e '.result' >/dev/null
+    lsp_hover "main.go" 2 8 "hover.rpc.json"
 }
