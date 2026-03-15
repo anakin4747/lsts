@@ -4,6 +4,7 @@ load '../lsts'
 
 lsts_set_cmd "pyright-langserver --stdio"
 lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures/python" && pwd)"
+lsts_set_langId "python"
 
 setup() {
     lsp_start

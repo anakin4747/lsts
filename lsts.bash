@@ -46,6 +46,14 @@ lsts_set_root() {
     LSTS_ROOT="$1"
 }
 
+lsts_set_langId() {
+    [[ $# == 1 ]] || {
+        echo "lsts_set_langId requires the language identifier"
+        exit 1
+    }
+    LSTS_LANG_ID="$1"
+}
+
 # ---------------------------------------------------------------------------
 # Transport — JSON-RPC framing and low-level send/recv
 #
@@ -220,7 +228,7 @@ lsp_hover() {
 	lsp_initialize
 
 	lsp_notify "textDocument/didOpen" \
-		"{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${language_id}\",\"version\":1,\"text\":${text}}}"
+		"{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${LSTS_LANG_ID}\",\"version\":1,\"text\":${text}}}"
 
 	lsp_request "textDocument/hover" \
 		"{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"

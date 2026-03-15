@@ -4,6 +4,7 @@ load '../lsts'
 
 lsts_set_cmd "gopls"
 lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures/go" && pwd)"
+lsts_set_langId "go"
 
 setup() {
     lsp_start
