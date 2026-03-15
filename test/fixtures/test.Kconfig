@@ -1,0 +1,4 @@
+config NET
+	bool "Networking support"
+	help
+	  Enable networking support.

@@ -1,10 +1,10 @@
 .PHONY: all test lint
 
-all:
-	nix develop --command make lint test
+all: lint test
 
 lint:
-	shellcheck --shell=bash lsp_poc.bats
+	nix develop --command shellcheck --shell=bash lsp_poc.bats
+	nix develop --command shfmt --diff lsp_poc.bats
 
 test:
-	bats lsp_poc.bats
+	nix develop --command bats lsp_poc.bats
