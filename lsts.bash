@@ -38,6 +38,14 @@ lsts_set_cmd() {
     LSP_CMD="$1"
 }
 
+lsts_set_root() {
+    [[ $# == 1 ]] || {
+        echo "lsts_set_root requires a root directory for specifying workspaceFolders"
+        exit 1
+    }
+    LSTS_ROOT="$1"
+}
+
 # ---------------------------------------------------------------------------
 # Transport — JSON-RPC framing and low-level send/recv
 #

@@ -3,7 +3,7 @@
 load '../lsts'
 
 lsts_set_cmd "kconfig-language-server"
-LSTS_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures" && pwd)"
+lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures" && pwd)"
 
 setup() {
     lsp_start
