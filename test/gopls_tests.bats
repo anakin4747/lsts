@@ -2,7 +2,7 @@
 
 load '../lsts'
 
-LSP_CMD="gopls"
+lsts_set_cmd "gopls"
 LSTS_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures/go" && pwd)"
 
 setup() {
