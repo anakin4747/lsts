@@ -19,10 +19,11 @@
           name = "lsts";
 
           packages = with pkgs; [
-            bash   # ensure bash 4+ (important for coproc)
-            bats   # test runner
-            jq     # JSON parsing in tests
-            kls    # kconfig-language-server under test
+            bash
+            bats
+            jq
+            shellcheck
+            kls
           ];
 
           shellHook = ''
