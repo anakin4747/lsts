@@ -30,13 +30,13 @@ lsts_set_langId() {
 
 _LSTS_ID=0
 
-lsp_send() {
+lsts_send() {
     local body="$1"
     local len=${#body}
     printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSTS_WRITE_FD"
 }
 
-lsp_recv() {
+lsts_recv() {
     local line content_length=0 raw
 
     while IFS= read -r -t "${LSTS_TIMEOUT:-10}" line <&"$LSTS_READ_FD"; do
@@ -48,7 +48,7 @@ lsp_recv() {
     done
 
     [[ "$content_length" -eq 0 ]] && {
-        echo "lsp_recv: no Content-Length header received" >&2
+        echo "lsts_recv: no Content-Length header received" >&2
         return 1
     }
 
@@ -57,25 +57,25 @@ lsp_recv() {
     LSTS_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
 }
 
-lsp_recv_response() {
+lsts_recv_response() {
     while true; do
-        lsp_recv || return 1
+        lsts_recv || return 1
         printf '%s' "$LSTS_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
     done
 }
 
-lsp_request() {
+lsts_request() {
     local method="$1" params="$2"
     _LSTS_ID=$((_LSTS_ID + 1))
-    lsp_send "{\"jsonrpc\":\"2.0\",\"id\":${_LSTS_ID},\"method\":\"${method}\",\"params\":${params}}"
+    lsts_send "{\"jsonrpc\":\"2.0\",\"id\":${_LSTS_ID},\"method\":\"${method}\",\"params\":${params}}"
 }
 
-lsp_notify() {
+lsts_notify() {
     local method="$1" params="$2"
-    lsp_send "{\"jsonrpc\":\"2.0\",\"method\":\"${method}\",\"params\":${params}}"
+    lsts_send "{\"jsonrpc\":\"2.0\",\"method\":\"${method}\",\"params\":${params}}"
 }
 
-lsp_start() {
+lsts_start() {
     : "${LSTS_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
     : "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
     : "${LSTS_LANG_ID:?language Id not set. use lsts_set_langId to set the language Id}"
@@ -88,13 +88,13 @@ lsp_start() {
     LSTS_WRITE_FD=${LSTS[1]}
 }
 
-lsp_stop() {
-    lsp_notify "exit" "{}" 2>/dev/null || true
+lsts_stop() {
+    lsts_notify "exit" "{}" 2>/dev/null || true
     kill "${LSTS_PID:-}" 2>/dev/null || true
     wait "${LSTS_PID:-}" 2>/dev/null || true
 }
 
-lsp_initialize() {
+lsts_initialize() {
     local root_uri root_path
 
     if [[ -n "${LSTS_ROOT:-}" ]]; then
@@ -110,35 +110,35 @@ lsp_initialize() {
         root_path="null"
     fi
 
-    lsp_request "initialize" \
+    lsts_request "initialize" \
         "{\"processId\":null,\"rootUri\":${root_uri},\"rootPath\":${root_path},\"capabilities\":{}}"
-    lsp_recv_response
+    lsts_recv_response
 
     # Fail fast if the server returned a JSON-RPC error
     local err
     err="$(printf '%s' "$LSTS_RESPONSE" | jq -r '.error')"
     [[ "$err" == "null" ]] || {
-        echo "lsp_initialize: server returned error: $err" >&2
+        echo "lsts_initialize: server returned error: $err" >&2
         return 1
     }
 
-    lsp_notify "initialized" "{}"
+    lsts_notify "initialized" "{}"
 }
 
-lsp_hover() {
+lsts_hover() {
     local path="$1" line="$2" character="$3" expected="$4"
 
     local uri="file://$LSTS_ROOT/$path"
     text="$(jq -Rs . <"$LSTS_ROOT/$path")"
 
-    lsp_initialize
+    lsts_initialize
 
-    lsp_notify "textDocument/didOpen" \
+    lsts_notify "textDocument/didOpen" \
         "{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${LSTS_LANG_ID}\",\"version\":1,\"text\":${text}}}"
 
-    lsp_request "textDocument/hover" \
+    lsts_request "textDocument/hover" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
-    lsp_recv_response
+    lsts_recv_response
 
     if [[ $# == 3 ]]; then
         printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
