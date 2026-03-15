@@ -80,6 +80,8 @@ lsp_start() {
     : "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
     : "${LSTS_LANG_ID:?language Id not set. use lsts_set_langId to set the language Id}"
 
+    cd "$LSTS_ROOT" || return 1
+
     _LSTS_ID=0
     coproc LSTS { ${LSTS_CMD}; }
     LSTS_READ_FD=${LSTS[0]}
@@ -124,13 +126,10 @@ lsp_initialize() {
 }
 
 lsp_hover() {
-    local uri="$1" line="$2" character="$3"
-    local text='""'
+    local path="$1" line="$2" character="$3" expected="$4"
 
-    if [[ "$uri" == file://* ]]; then
-        local path="${uri#file://}"
-        text="$(jq -Rs . <"$path")"
-    fi
+    local uri="file://$LSTS_ROOT/$path"
+    text="$(jq -Rs . <"$LSTS_ROOT/$path")"
 
     lsp_initialize
 
@@ -140,4 +139,12 @@ lsp_hover() {
     lsp_request "textDocument/hover" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
     lsp_recv_response
+
+    if [[ $# == 3 ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
 }

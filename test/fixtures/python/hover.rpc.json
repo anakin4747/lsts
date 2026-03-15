@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":{"contents":{"kind":"plaintext","value":"(function) def len(\n    obj: Sized,\n    /\n) -> int"},"range":{"start":{"line":1,"character":8},"end":{"line":1,"character":11}}}}

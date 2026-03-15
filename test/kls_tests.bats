@@ -3,7 +3,7 @@
 load '../lsts'
 
 lsts_set_cmd "kconfig-language-server"
-lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures" && pwd)"
+lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures/kconfig" && pwd)"
 lsts_set_langId "kconfig"
 
 setup() {
@@ -28,27 +28,6 @@ teardown() {
     [[ "$err" == "null" ]]
 }
 
-@test "kconfig: hover on 'config' keyword returns markdown documentation" {
-    local fixture="${LSTS_ROOT}/test.Kconfig"
-    local uri="file://${fixture}"
-
-    lsp_hover "$uri" 0 0
-
-    echo "$LSTS_RESPONSE" | jq -e '.result' >/dev/null
-
-    local contents
-    contents="$(echo "$LSTS_RESPONSE" | jq -r '.result.contents.value')"
-    [[ -n "$contents" ]]
-}
-
-@test "kconfig: hover response id matches the request" {
-    local fixture="${LSTS_ROOT}/test.Kconfig"
-    local uri="file://${fixture}"
-
-    lsp_hover "$uri" 0 0
-
-    local got_id expected_id
-    got_id="$(echo "$LSTS_RESPONSE" | jq -r '.id')"
-    expected_id=2
-    [[ "$got_id" == "$expected_id" ]]
+@test "kconfig: hover on 'config' keyword returns documentation" {
+    lsp_hover "test.Kconfig" 0 0 "hover.rpc.json"
 }
