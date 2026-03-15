@@ -7,6 +7,7 @@ load 'lsts'
 
 LSP_CMD="kconfig-language-server"
 LSTS_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/test/fixtures" && pwd)"
+export LSP_CMD LSTS_ROOT
 
 setup()    { lsp_start; }
 teardown() { lsp_stop;  }
