@@ -32,7 +32,7 @@ teardown() {
     local fixture="${LSTS_ROOT}/test.Kconfig"
     local uri="file://${fixture}"
 
-    lsp_hover "$uri" "kconfig" 0 0
+    lsp_hover "$uri" 0 0
 
     echo "$LSP_RESPONSE" | jq -e '.result' >/dev/null
 
@@ -45,7 +45,7 @@ teardown() {
     local fixture="${LSTS_ROOT}/test.Kconfig"
     local uri="file://${fixture}"
 
-    lsp_hover "$uri" "kconfig" 0 0
+    lsp_hover "$uri" 0 0
 
     local got_id expected_id
     got_id="$(echo "$LSP_RESPONSE" | jq -r '.id')"

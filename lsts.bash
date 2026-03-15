@@ -217,7 +217,7 @@ lsp_initialize() {
 #
 # Populates LSP_RESPONSE with the Hover result (or null result) on success.
 lsp_hover() {
-	local uri="$1" language_id="$2" line="$3" character="$4"
+	local uri="$1" line="$2" character="$3"
 	local text='""'
 
 	if [[ "$uri" == file://* ]]; then

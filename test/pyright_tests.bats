@@ -34,7 +34,7 @@ teardown() {
     local fixture="${LSTS_ROOT}/main.py"
     local uri="file://${fixture}"
 
-    lsp_hover "$uri" "python" 1 8
+    lsp_hover "$uri" 1 8
 
     echo "$LSP_RESPONSE" | jq -e '.result' >/dev/null
 }
