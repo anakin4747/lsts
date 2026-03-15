@@ -17,14 +17,14 @@ teardown() {
 @test "kconfig: initialize returns capabilities" {
     lsp_initialize
 
-    echo "$LSP_RESPONSE" | jq -e '.result.capabilities | objects' >/dev/null
+    echo "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' >/dev/null
 }
 
 @test "kconfig: initialize handshake completes without error" {
     lsp_initialize
 
     local err
-    err="$(echo "$LSP_RESPONSE" | jq -r '.error')"
+    err="$(echo "$LSTS_RESPONSE" | jq -r '.error')"
     [[ "$err" == "null" ]]
 }
 
@@ -34,10 +34,10 @@ teardown() {
 
     lsp_hover "$uri" 0 0
 
-    echo "$LSP_RESPONSE" | jq -e '.result' >/dev/null
+    echo "$LSTS_RESPONSE" | jq -e '.result' >/dev/null
 
     local contents
-    contents="$(echo "$LSP_RESPONSE" | jq -r '.result.contents.value')"
+    contents="$(echo "$LSTS_RESPONSE" | jq -r '.result.contents.value')"
     [[ -n "$contents" ]]
 }
 
@@ -48,7 +48,7 @@ teardown() {
     lsp_hover "$uri" 0 0
 
     local got_id expected_id
-    got_id="$(echo "$LSP_RESPONSE" | jq -r '.id')"
+    got_id="$(echo "$LSTS_RESPONSE" | jq -r '.id')"
     expected_id=2
     [[ "$got_id" == "$expected_id" ]]
 }
