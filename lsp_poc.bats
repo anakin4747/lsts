@@ -57,7 +57,6 @@ teardown() { lsp_stop;  }
 
     local got_id expected_id
     got_id="$(echo "$LSP_RESPONSE" | jq -r '.id')"
-    # initialize consumed id 1; hover request is id 2
     expected_id=2
     [[ "$got_id" == "$expected_id" ]]
 }
