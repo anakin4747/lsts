@@ -4,7 +4,7 @@ all:
 	nix develop --command make test
 
 lint:
-	shellcheck --shell=bash lsts.bash test/lsts_tests.bats
+	shellcheck --shell=bash lsts.bash test/*_tests.bats
 
 test:
-	bats test/lsts_tests.bats
+	bats test/*_tests.bats
