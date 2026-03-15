@@ -24,6 +24,9 @@
             jq
             shellcheck
             kls
+            go
+            gopls
+            pyright
           ];
 
           shellHook = ''
