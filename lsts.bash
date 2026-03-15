@@ -9,7 +9,7 @@ lsts_set_cmd() {
         echo "lsts_set_cmd cannot find the target language server: '$ls'"
         exit 1
     }
-    LSP_CMD="$1"
+    LSTS_CMD="$1"
 }
 
 lsts_set_root() {
@@ -33,13 +33,13 @@ _LSTS_ID=0
 lsp_send() {
 	local body="$1"
 	local len=${#body}
-	printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSP_WRITE_FD"
+	printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSTS_WRITE_FD"
 }
 
 lsp_recv() {
 	local line content_length=0 raw
 
-	while IFS= read -r -t "${LSP_TIMEOUT:-10}" line <&"$LSP_READ_FD"; do
+	while IFS= read -r -t "${LSTS_TIMEOUT:-10}" line <&"$LSTS_READ_FD"; do
 		line="${line%$'\r'}"
 		[[ -z "$line" ]] && break
 		if [[ "$line" =~ ^Content-Length:\ ([0-9]+)$ ]]; then
@@ -52,15 +52,15 @@ lsp_recv() {
 		return 1
 	}
 
-	IFS= read -r -N "$content_length" -t "${LSP_TIMEOUT:-10}" raw <&"$LSP_READ_FD"
+	IFS= read -r -N "$content_length" -t "${LSTS_TIMEOUT:-10}" raw <&"$LSTS_READ_FD"
 
-	LSP_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
+	LSTS_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
 }
 
 lsp_recv_response() {
 	while true; do
 		lsp_recv || return 1
-		printf '%s' "$LSP_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
+		printf '%s' "$LSTS_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
 	done
 }
 
@@ -76,20 +76,20 @@ lsp_notify() {
 }
 
 lsp_start() {
-	: "${LSP_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
+	: "${LSTS_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
 	: "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
 	: "${LSTS_LANG_ID:?language Id not set. use lsts_set_langId to set the language Id}"
 
 	_LSTS_ID=0
-	coproc LSP { ${LSP_CMD}; }
-	LSP_READ_FD=${LSP[0]}
-	LSP_WRITE_FD=${LSP[1]}
+	coproc LSTS { ${LSTS_CMD}; }
+	LSTS_READ_FD=${LSTS[0]}
+	LSTS_WRITE_FD=${LSTS[1]}
 }
 
 lsp_stop() {
 	lsp_notify "exit" "{}" 2>/dev/null || true
-	kill "${LSP_PID:-}" 2>/dev/null || true
-	wait "${LSP_PID:-}" 2>/dev/null || true
+	kill "${LSTS_PID:-}" 2>/dev/null || true
+	wait "${LSTS_PID:-}" 2>/dev/null || true
 }
 
 lsp_initialize() {
@@ -114,7 +114,7 @@ lsp_initialize() {
 
 	# Fail fast if the server returned a JSON-RPC error
 	local err
-	err="$(printf '%s' "$LSP_RESPONSE" | jq -r '.error')"
+	err="$(printf '%s' "$LSTS_RESPONSE" | jq -r '.error')"
 	[[ "$err" == "null" ]] || {
 		echo "lsp_initialize: server returned error: $err" >&2
 		return 1
