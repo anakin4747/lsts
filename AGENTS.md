@@ -14,3 +14,16 @@ initialiazation request and then another request like hover.
 
 Help me come up with how to properly structure this as a bats library that can
 be reused in several language servers for rigorous end to end testing
+
+## The ./language-server-protocol folder
+
+This folder is the git repo for the offical language server protocol
+specification from microsoft. Use this as reference for expected methods and
+arguments to methods.
+
+## Git discipline
+
+Commit every logical atomic addition or change using git. Each commit should
+represent one coherent unit of work (e.g. add a helper function, fix a bug,
+update the flake). Do not batch unrelated changes into a single commit. Commit
+messages should be concise and written in the imperative mood.
