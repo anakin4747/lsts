@@ -4,6 +4,7 @@ load '../lsts'
 
 lsts_set_cmd "kconfig-language-server"
 lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures" && pwd)"
+lsts_set_langId "kconfig"
 
 setup() {
     lsp_start
