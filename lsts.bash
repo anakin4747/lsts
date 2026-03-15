@@ -5,7 +5,10 @@
 #
 # Required globals (set before setup()):
 #   LSP_CMD    — command to launch the language server, e.g. "kconfig-language-server"
-#   LSTS_ROOT  — workspace root path passed to initialize (optional, defaults to null)
+#
+# Optional globals:
+#   LSTS_ROOT  — workspace root; bare path or file:// URI; sent as JSON null when unset
+#   LSP_TIMEOUT — seconds to wait for a server response (default: 10)
 #
 # Typical test file structure:
 #
@@ -38,7 +41,7 @@ lsp_send() {
 	printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSP_WRITE_FD"
 }
 
-# Read one JSON-RPC message into LSP_RESPONSE.
+# Read one raw JSON-RPC frame into LSP_RESPONSE.
 # Must be called outside a subshell — coproc FDs are close-on-exec.
 # Sanitizes unescaped control characters that some servers embed in string
 # values (violating RFC 8259) so jq can parse the response.
@@ -63,6 +66,16 @@ lsp_recv() {
 	LSP_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
 }
 
+# Read frames into LSP_RESPONSE until a response (has an "id" field) is found.
+# Discards server-initiated notifications (window/logMessage, telemetry, etc.)
+# that some servers emit before or between responses.
+lsp_recv_response() {
+	while true; do
+		lsp_recv || return 1
+		printf '%s' "$LSP_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
+	done
+}
+
 # Send a JSON-RPC request with an auto-incremented id
 lsp_request() {
 	local method="$1" params="$2"
@@ -80,7 +93,8 @@ lsp_notify() {
 # Lifecycle — server process management
 #
 # Globals read:    LSP_CMD
-# Globals written: LSP_READ_FD, LSP_WRITE_FD, LSP_PID, _LSTS_ID
+# Globals written: LSP_READ_FD, LSP_WRITE_FD, _LSTS_ID
+#                  LSP_PID is set implicitly by Bash when naming a coproc
 # ---------------------------------------------------------------------------
 
 # Start the language server as a coprocess.
@@ -94,7 +108,7 @@ lsp_start() {
 	LSP_WRITE_FD=${LSP[1]}
 }
 
-# Stop the language server gracefully, then forcefully if needed.
+# Stop the language server.
 # Call from bats teardown().
 lsp_stop() {
 	lsp_notify "exit" "{}" 2>/dev/null || true
@@ -112,24 +126,32 @@ lsp_stop() {
 # Perform the initialize request + initialized notification.
 # This must be the first exchange on every fresh server connection.
 #
-# LSTS_ROOT should be set to the workspace root path before calling any
-# method helper. It is passed as both rootUri and rootPath for compatibility
-# with servers that use either field.
+# LSTS_ROOT may be either a bare filesystem path or a file:// URI.
+# rootUri is always sent as a file:// URI; rootPath is always sent as a bare
+# path. Both are derived from LSTS_ROOT automatically for compatibility with
+# servers that use either field.
 #
 # Populates LSP_RESPONSE with the InitializeResult on success.
 # Returns non-zero if the server responds with an error.
 lsp_initialize() {
-	local root
+	local root_uri root_path
 
 	if [[ -n "${LSTS_ROOT:-}" ]]; then
-		root="\"${LSTS_ROOT}\""
+		if [[ "$LSTS_ROOT" == file://* ]]; then
+			root_uri="\"${LSTS_ROOT}\""
+			root_path="\"${LSTS_ROOT#file://}\""
+		else
+			root_uri="\"file://${LSTS_ROOT}\""
+			root_path="\"${LSTS_ROOT}\""
+		fi
 	else
-		root="null"
+		root_uri="null"
+		root_path="null"
 	fi
 
 	lsp_request "initialize" \
-		"{\"processId\":null,\"rootUri\":${root},\"rootPath\":${root},\"capabilities\":{}}"
-	lsp_recv
+		"{\"processId\":null,\"rootUri\":${root_uri},\"rootPath\":${root_path},\"capabilities\":{}}"
+	lsp_recv_response
 
 	# Fail fast if the server returned a JSON-RPC error
 	local err
@@ -160,19 +182,26 @@ lsp_initialize() {
 #   line         — zero-based line number of the hover position
 #   character    — zero-based character offset of the hover position
 #
-# The test author is responsible for the fixture file existing on disk at the
-# path encoded in <uri> before calling this function.
+# When uri has the file:// scheme the file is read from disk and sent as the
+# document text in didOpen so servers that require real content (e.g. pyright)
+# work correctly.
 #
 # Populates LSP_RESPONSE with the Hover result (or null result) on success.
 lsp_hover() {
 	local uri="$1" language_id="$2" line="$3" character="$4"
+	local text='""'
+
+	if [[ "$uri" == file://* ]]; then
+		local path="${uri#file://}"
+		text="$(jq -Rs . <"$path")"
+	fi
 
 	lsp_initialize
 
 	lsp_notify "textDocument/didOpen" \
-		"{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${language_id}\",\"version\":1,\"text\":\"\"}}"
+		"{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${language_id}\",\"version\":1,\"text\":${text}}}"
 
 	lsp_request "textDocument/hover" \
 		"{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
-	lsp_recv
+	lsp_recv_response
 }
