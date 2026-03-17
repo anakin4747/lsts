@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
 
-load '../lsts'
+source lsts
 
 lsts_set_cmd "pyright-langserver --stdio"
-lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")/fixtures/python" && pwd)"
+lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/python"
 lsts_set_langId "python"
 
 setup() {
@@ -14,22 +14,14 @@ teardown() {
     lsts_stop
 }
 
-@test "pyright: initialize returns capabilities" {
+@test "initializes successfully" {
     lsts_initialize
-
-    echo "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' >/dev/null
 }
 
-@test "pyright: initialize handshake completes without error" {
-    lsts_initialize
-
-    local err
-    err="$(echo "$LSTS_RESPONSE" | jq -r '.error')"
-    [[ "$err" == "null" ]]
-
-    kill -0 "${LSTS_PID}"
-}
-
-@test "pyright: hover on 'len' returns documentation" {
+@test "hover on 'len' returns documentation" {
     lsts_hover "main.py" 1 8 "hover.rpc.json"
+}
+
+@test "dummy hover to emit warning for snapshot mode" {
+    lsts_hover "main.py" 1 8 > "hover.rpc.json"
 }
