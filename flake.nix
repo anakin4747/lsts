@@ -27,11 +27,10 @@
             go
             gopls
             pyright
+            sonar-scanner-cli
           ];
 
-          shellHook = ''
-            echo "lsts dev shell – bats $(bats --version) / jq $(jq --version)"
-          '';
+          env.SONAR_SCANNER_OPTS = "-Dsonar.scanner.skipJreProvisioning=true";
         };
       });
 }
