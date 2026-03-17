@@ -28,6 +28,10 @@
             gopls
             lua-language-server
             pyright
+            bash-language-server
+            nil
+            typescript
+            typescript-language-server
             sonar-scanner-cli
           ];
 
