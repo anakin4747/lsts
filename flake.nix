@@ -26,6 +26,7 @@
             kls
             go
             gopls
+            lua-language-server
             pyright
             sonar-scanner-cli
           ];
