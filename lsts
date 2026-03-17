@@ -98,7 +98,7 @@ lsts_stop() {
 lsts_initialize() {
 
     lsts_request "initialize" \
-        "{\"processId\":null,\"rootUri\":\"file://${LSTS_ROOT}\",\"rootPath\":\"${LSTS_ROOT}\",\"capabilities\":{}}"
+        "{\"processId\":null,\"rootUri\":\"file://${LSTS_ROOT}\",\"rootPath\":\"${LSTS_ROOT}\",\"capabilities\":{\"window\":{\"workDoneProgress\":true}}}"
     lsts_recv_response
 
     # Fail fast if the server returned a JSON-RPC error
@@ -114,22 +114,207 @@ lsts_initialize() {
     echo "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' > /dev/null
 }
 
-lsts_hover() {
-    local path="$1" line="$2" character="$3" expected="$4"
-
+# lsts_open <relative-path>
+# Opens a document and sends textDocument/didOpen. Requires lsts_initialize
+# to have been called first.
+lsts_open() {
+    local path="$1"
     local uri="file://$LSTS_ROOT/$path"
+    local text
     text="$(jq -Rs . <"$LSTS_ROOT/$path")"
-
-    lsts_initialize
 
     lsts_notify "textDocument/didOpen" \
         "{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${LSTS_LANG_ID}\",\"version\":1,\"text\":${text}}}"
+}
 
-    lsts_request "textDocument/hover" \
+# _lsts_pos_request <method> <path> <line> <character> [snapshot-file]
+# Internal helper: initialize, open, send a position-based request, and either
+# diff against snapshot or print the raw response (snapshot mode).
+_lsts_pos_request() {
+    local method="$1" path="$2" line="$3" character="$4" expected="${5:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "$method" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
     lsts_recv_response
 
-    if [[ $# == 3 ]]; then
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+lsts_hover() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/hover" "$path" "$line" "$character" "$expected"
+}
+
+lsts_definition() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/definition" "$path" "$line" "$character" "$expected"
+}
+
+lsts_declaration() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/declaration" "$path" "$line" "$character" "$expected"
+}
+
+lsts_type_definition() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/typeDefinition" "$path" "$line" "$character" "$expected"
+}
+
+lsts_implementation() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/implementation" "$path" "$line" "$character" "$expected"
+}
+
+lsts_document_highlight() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/documentHighlight" "$path" "$line" "$character" "$expected"
+}
+
+lsts_signature_help() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+    _lsts_pos_request "textDocument/signatureHelp" "$path" "$line" "$character" "$expected"
+}
+
+# lsts_completion <path> <line> <character> [snapshot-file]
+lsts_completion() {
+    local path="$1" line="$2" character="$3" expected="${4:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/completion" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"triggerKind\":1}}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+# lsts_references <path> <line> <character> [include-declaration:true|false] [snapshot-file]
+lsts_references() {
+    local path="$1" line="$2" character="$3"
+    local include_decl="${4:-true}"
+    local expected="${5:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/references" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"includeDeclaration\":${include_decl}}}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+# lsts_document_symbols <path> [snapshot-file]
+lsts_document_symbols() {
+    local path="$1" expected="${2:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/documentSymbol" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"}}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+# lsts_formatting <path> [tab-size] [insert-spaces] [snapshot-file]
+lsts_formatting() {
+    local path="$1"
+    local tab_size="${2:-4}"
+    local insert_spaces="${3:-true}"
+    local expected="${4:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/formatting" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"options\":{\"tabSize\":${tab_size},\"insertSpaces\":${insert_spaces}}}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+# lsts_rename <path> <line> <character> <new-name> [snapshot-file]
+lsts_rename() {
+    local path="$1" line="$2" character="$3" new_name="$4" expected="${5:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/rename" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"newName\":\"${new_name}\"}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
+        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        echo "$LSTS_RESPONSE"
+        return
+    fi
+
+    diff <(echo "$LSTS_RESPONSE") "$expected"
+}
+
+# lsts_code_action <path> <start-line> <start-char> <end-line> <end-char> [snapshot-file]
+lsts_code_action() {
+    local path="$1" sl="$2" sc="$3" el="$4" ec="$5" expected="${6:-}"
+
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    lsts_request "textDocument/codeAction" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"range\":{\"start\":{\"line\":${sl},\"character\":${sc}},\"end\":{\"line\":${el},\"character\":${ec}}},\"context\":{\"diagnostics\":[]}}"
+    lsts_recv_response
+
+    if [[ -z "$expected" ]]; then
         printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
         echo "$LSTS_RESPONSE"
         return
