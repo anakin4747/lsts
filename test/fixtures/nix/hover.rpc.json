@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":{"contents":{"kind":"markdown","value":"Let binding `greeting`\n`string`"},"range":{"end":{"character":10,"line":3},"start":{"character":2,"line":3}}}}

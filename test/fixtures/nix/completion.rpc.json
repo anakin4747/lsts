@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":[{"insertTextFormat":1,"insertTextMode":2,"kind":6,"label":"greeting","labelDetails":{},"textEdit":{"newText":"greeting","range":{"end":{"character":10,"line":3},"start":{"character":2,"line":3}}}}]}

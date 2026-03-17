@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":[{"children":[],"kind":13,"name":"greeting","range":{"end":{"character":28,"line":3},"start":{"character":2,"line":3}},"selectionRange":{"end":{"character":10,"line":3},"start":{"character":2,"line":3}}}]}

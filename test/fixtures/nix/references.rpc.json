@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":2,"result":[{"range":{"end":{"character":34,"line":5},"start":{"character":26,"line":5}},"uri":"file:///home/kin/src/lsts/test/fixtures/nix/main.nix"}]}
