@@ -25,3 +25,5 @@ teardown() {
 @test "dummy hover to emit warning for snapshot mode" {
     lsts_hover "test.Kconfig" 0 0 > "hover.rpc.json"
 }
+
+
