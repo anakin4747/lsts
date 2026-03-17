@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 lsts_set_cmd() {
     [[ $# == 1 ]] || {
@@ -95,34 +96,22 @@ lsts_stop() {
 }
 
 lsts_initialize() {
-    local root_uri root_path
-
-    if [[ -n "${LSTS_ROOT:-}" ]]; then
-        if [[ "$LSTS_ROOT" == file://* ]]; then
-            root_uri="\"${LSTS_ROOT}\""
-            root_path="\"${LSTS_ROOT#file://}\""
-        else
-            root_uri="\"file://${LSTS_ROOT}\""
-            root_path="\"${LSTS_ROOT}\""
-        fi
-    else
-        root_uri="null"
-        root_path="null"
-    fi
 
     lsts_request "initialize" \
-        "{\"processId\":null,\"rootUri\":${root_uri},\"rootPath\":${root_path},\"capabilities\":{}}"
+        "{\"processId\":null,\"rootUri\":\"file://${LSTS_ROOT}\",\"rootPath\":\"${LSTS_ROOT}\",\"capabilities\":{}}"
     lsts_recv_response
 
     # Fail fast if the server returned a JSON-RPC error
     local err
-    err="$(printf '%s' "$LSTS_RESPONSE" | jq -r '.error')"
+    err="$(echo "$LSTS_RESPONSE" | jq -r '.error')"
     [[ "$err" == "null" ]] || {
         echo "lsts_initialize: server returned error: $err" >&2
         return 1
     }
 
     lsts_notify "initialized" "{}"
+
+    echo "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' > /dev/null
 }
 
 lsts_hover() {
