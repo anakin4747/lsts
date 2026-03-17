@@ -61,7 +61,10 @@ lsts_recv() {
 lsts_recv_response() {
     while true; do
         lsts_recv || return 1
-        printf '%s' "$LSTS_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
+        # Skip server-to-client requests/notifications (they have a "method" field).
+        # A proper response has "id" but no "method".
+        printf '%s' "$LSTS_RESPONSE" | \
+            jq -e 'has("id") and (has("method") | not)' >/dev/null 2>&1 && return 0
     done
 }
 
