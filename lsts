@@ -137,133 +137,133 @@ lsts_open() {
         "{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${LSTS_LANG_ID}\",\"version\":1,\"text\":${text}}}"
 }
 
-# _lsts_snapshot_or_diff [snapshot-file]
-# Print LSTS_RESPONSE (snapshot mode) or diff it against snapshot-file.
-_lsts_snapshot_or_diff() {
-    local expected="${1:-}"
-    if [[ -z "$expected" ]]; then
+# _lsts_fixture_or_print [fixture-path]
+# Diff LSTS_RESPONSE against fixture-path, or print it (snapshot mode) if omitted.
+_lsts_fixture_or_print() {
+    local fixture="${1:-}"
+    if [[ -z "$fixture" ]]; then
         printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
         echo "$LSTS_RESPONSE"
         return
     fi
-    diff <(echo "$LSTS_RESPONSE") "$expected"
+    diff <(echo "$LSTS_RESPONSE") "$fixture"
 }
 
-# _lsts_doc_request <method> <path> <params-json> [snapshot-file]
+# _lsts_doc_request <method> <path> <params-json> [fixture-path]
 # Internal helper: initialize, open, send a request with caller-supplied
-# params, then snapshot-or-diff.
+# params, then fixture-or-print.
 _lsts_doc_request() {
-    local method="$1" path="$2" params="$3" expected="${4:-}"
+    local method="$1" path="$2" params="$3" fixture="${4:-}"
 
     lsts_initialize
     lsts_open "$path"
     lsts_request "$method" "$params"
     lsts_recv_response
 
-    _lsts_snapshot_or_diff "$expected"
+    _lsts_fixture_or_print "$fixture"
 }
 
-# _lsts_pos_request <method> <path> <line> <character> [snapshot-file]
+# _lsts_pos_request <method> <path> <line> <character> [fixture-path]
 # Internal helper for position-based requests.
 _lsts_pos_request() {
-    local method="$1" path="$2" line="$3" character="$4" expected="${5:-}"
+    local method="$1" path="$2" line="$3" character="$4" fixture="${5:-}"
     local uri="file://$LSTS_ROOT/$path"
 
     _lsts_doc_request "$method" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}" \
-        "$expected"
+        "$fixture"
 }
 
 lsts_hover() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/hover" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/hover" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_definition() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/definition" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/definition" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_declaration() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/declaration" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/declaration" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_type_definition() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/typeDefinition" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/typeDefinition" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_implementation() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/implementation" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/implementation" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_document_highlight() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/documentHighlight" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/documentHighlight" "$path" "$line" "$character" "$fixture"
 }
 
 lsts_signature_help() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
-    _lsts_pos_request "textDocument/signatureHelp" "$path" "$line" "$character" "$expected"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/signatureHelp" "$path" "$line" "$character" "$fixture"
 }
 
-# lsts_completion <path> <line> <character> [snapshot-file]
+# lsts_completion <path> <line> <character> [fixture-path]
 lsts_completion() {
-    local path="$1" line="$2" character="$3" expected="${4:-}"
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/completion" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"triggerKind\":1}}" \
-        "$expected"
+        "$fixture"
 }
 
-# lsts_references <path> <line> <character> [include-declaration:true|false] [snapshot-file]
+# lsts_references <path> <line> <character> [include-declaration:true|false] [fixture-path]
 lsts_references() {
     local path="$1" line="$2" character="$3"
     local include_decl="${4:-true}"
-    local expected="${5:-}"
+    local fixture="${5:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/references" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"includeDeclaration\":${include_decl}}}" \
-        "$expected"
+        "$fixture"
 }
 
-# lsts_document_symbols <path> [snapshot-file]
+# lsts_document_symbols <path> [fixture-path]
 lsts_document_symbols() {
-    local path="$1" expected="${2:-}"
+    local path="$1" fixture="${2:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/documentSymbol" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"}}" \
-        "$expected"
+        "$fixture"
 }
 
-# lsts_formatting <path> [tab-size] [insert-spaces] [snapshot-file]
+# lsts_formatting <path> [tab-size] [insert-spaces] [fixture-path]
 lsts_formatting() {
     local path="$1"
     local tab_size="${2:-4}"
     local insert_spaces="${3:-true}"
-    local expected="${4:-}"
+    local fixture="${4:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/formatting" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"options\":{\"tabSize\":${tab_size},\"insertSpaces\":${insert_spaces}}}" \
-        "$expected"
+        "$fixture"
 }
 
-# lsts_rename <path> <line> <character> <new-name> [snapshot-file]
+# lsts_rename <path> <line> <character> <new-name> [fixture-path]
 lsts_rename() {
-    local path="$1" line="$2" character="$3" new_name="$4" expected="${5:-}"
+    local path="$1" line="$2" character="$3" new_name="$4" fixture="${5:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/rename" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"newName\":\"${new_name}\"}" \
-        "$expected"
+        "$fixture"
 }
 
-# lsts_code_action <path> <start-line> <start-char> <end-line> <end-char> [snapshot-file]
+# lsts_code_action <path> <start-line> <start-char> <end-line> <end-char> [fixture-path]
 lsts_code_action() {
-    local path="$1" sl="$2" sc="$3" el="$4" ec="$5" expected="${6:-}"
+    local path="$1" sl="$2" sc="$3" el="$4" ec="$5" fixture="${6:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/codeAction" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"range\":{\"start\":{\"line\":${sl},\"character\":${sc}},\"end\":{\"line\":${el},\"character\":${ec}}},\"context\":{\"diagnostics\":[]}}" \
-        "$expected"
+        "$fixture"
 }
