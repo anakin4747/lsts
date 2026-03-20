@@ -7,6 +7,7 @@ lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/go"
 lsts_set_langId "go"
 
 setup() {
+    lsts_print_test_location
     lsts_start
 }
 
