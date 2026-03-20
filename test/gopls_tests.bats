@@ -113,3 +113,11 @@ teardown() {
 @test "dummy outgoing_calls to emit warning for snapshot mode" {
     lsts_goto_outgoing_calls "main.go" 4 5 > "outgoing_calls.rpc.json"
 }
+
+@test "prepare call hierarchy on 'main' returns item" {
+    lsts_call_hierarchy_prepare "main.go" 4 5 "call_hierarchy_prepare.rpc.json"
+}
+
+@test "dummy call_hierarchy_prepare to emit warning for snapshot mode" {
+    lsts_call_hierarchy_prepare "main.go" 4 5 > "call_hierarchy_prepare.rpc.json"
+}
