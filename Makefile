@@ -7,4 +7,4 @@ lint:
 	-shellcheck --shell=bash lsts test/*_tests.bats
 
 test:
-	bats test/*_tests.bats
+	bats --formatter $(CURDIR)/lsts-format-pretty test/*_tests.bats
