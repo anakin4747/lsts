@@ -97,3 +97,19 @@ teardown() {
 @test "dummy code_action to emit warning for snapshot mode" {
     lsts_code_action "main.go" 2 0 2 12 > "code_action.rpc.json"
 }
+
+@test "incoming calls on 'Println' returns callers" {
+    lsts_goto_incoming_calls "main.go" 5 5 "incoming_calls.rpc.json"
+}
+
+@test "dummy incoming_calls to emit warning for snapshot mode" {
+    lsts_goto_incoming_calls "main.go" 5 5 > "incoming_calls.rpc.json"
+}
+
+@test "outgoing calls on 'main' returns callees" {
+    lsts_goto_outgoing_calls "main.go" 4 5 "outgoing_calls.rpc.json"
+}
+
+@test "dummy outgoing_calls to emit warning for snapshot mode" {
+    lsts_goto_outgoing_calls "main.go" 4 5 > "outgoing_calls.rpc.json"
+}
