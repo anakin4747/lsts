@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Derived from bats-format-pretty, part of bats-core
+# https://github.com/bats-core/bats-core
+# Copyright (c) 2017 bats-core contributors (MIT License)
+#
+# Modifications: append file:line to each test result line.
+# Copyright (c) 2024 lsts contributors
 set -e
 
 # Locate formatter.bash relative to the bats binary so this script works
