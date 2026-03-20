@@ -272,13 +272,6 @@ buffer() {
   _buffer+="$content"
 }
 
-prefix_buffer_with() {
-  local old_buffer="$_buffer"
-  _buffer=''
-  "$@"
-  _buffer="$_buffer$old_buffer"
-}
-
 flush() {
   printf '%s' "$_buffer"
   _buffer=
