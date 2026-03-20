@@ -165,7 +165,7 @@ lsts_open() {
 _lsts_fixture_or_print() {
     local fixture="${1:-}"
     if [[ -z "$fixture" ]]; then
-        printf "\e[01;33mWARNING: snapshot mode\e[0m\n" >&3
+        printf "\e[01;33m WARNING\e[0m previous test in snapshot mode\n" >&3
         echo "$LSTS_RESPONSE"
         return
     fi
