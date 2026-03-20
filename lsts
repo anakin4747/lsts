@@ -41,7 +41,8 @@ _LSTS_ID=0
 # Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
     local body="$1"
-    local len=${#body}
+    local len
+    len="$(printf '%s' "$body" | wc -c)"
     printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSTS_WRITE_FD"
 }
 
