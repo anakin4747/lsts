@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# lsts_set_cmd <command>
+# Set the command used to start the language server under test.
 lsts_set_cmd() {
     [[ $# == 1 ]] || {
         echo "lsts_set_cmd requires the command to start the target language server"
@@ -13,6 +15,8 @@ lsts_set_cmd() {
     LSTS_CMD="$1"
 }
 
+# lsts_set_root <directory>
+# Set the workspace root directory passed to the language server as rootUri.
 lsts_set_root() {
     [[ $# == 1 ]] || {
         echo "lsts_set_root requires a root directory for specifying workspaceFolders"
@@ -21,6 +25,8 @@ lsts_set_root() {
     LSTS_ROOT="$1"
 }
 
+# lsts_set_langId <language-id>
+# Set the LSP language identifier sent in textDocument/didOpen notifications.
 lsts_set_langId() {
     [[ $# == 1 ]] || {
         echo "lsts_set_langId requires the language identifier"
@@ -31,12 +37,16 @@ lsts_set_langId() {
 
 _LSTS_ID=0
 
+# lsts_send <body>
+# Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
     local body="$1"
     local len=${#body}
     printf "Content-Length: %d\r\n\r\n%s" "$len" "$body" >&"$LSTS_WRITE_FD"
 }
 
+# lsts_recv
+# Read one JSON-RPC message from the language server into LSTS_RESPONSE.
 lsts_recv() {
     local line content_length=0 raw
 
@@ -58,6 +68,9 @@ lsts_recv() {
     LSTS_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
 }
 
+# lsts_recv_response
+# Read messages until a JSON-RPC response (has "id", no "method") is received,
+# auto-replying to any server-to-client requests encountered along the way.
 lsts_recv_response() {
     while true; do
         lsts_recv || return 1
@@ -75,17 +88,23 @@ lsts_recv_response() {
     done
 }
 
+# lsts_request <method> <params-json>
+# Send a JSON-RPC request with an auto-incremented id.
 lsts_request() {
     local method="$1" params="$2"
     _LSTS_ID=$((_LSTS_ID + 1))
     lsts_send "{\"jsonrpc\":\"2.0\",\"id\":${_LSTS_ID},\"method\":\"${method}\",\"params\":${params}}"
 }
 
+# lsts_notify <method> <params-json>
+# Send a JSON-RPC notification (no id, no response expected).
 lsts_notify() {
     local method="$1" params="$2"
     lsts_send "{\"jsonrpc\":\"2.0\",\"method\":\"${method}\",\"params\":${params}}"
 }
 
+# lsts_start
+# Start the language server as a coprocess and open read/write file descriptors.
 lsts_start() {
     : "${LSTS_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
     : "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
@@ -99,19 +118,23 @@ lsts_start() {
     LSTS_WRITE_FD=${LSTS[1]}
 }
 
+# lsts_stop
+# Gracefully shut down the language server and reap the coprocess.
 lsts_stop() {
     lsts_notify "exit" "{}" 2>/dev/null || true
     kill "${LSTS_PID:-}" 2>/dev/null || true
     wait "${LSTS_PID:-}" 2>/dev/null || true
 }
 
+# lsts_initialize
+# Send the LSP initialize/initialized handshake and verify the server responded
+# with capabilities.
 lsts_initialize() {
-
     lsts_request "initialize" \
         "{\"processId\":null,\"rootUri\":\"file://${LSTS_ROOT}\",\"rootPath\":\"${LSTS_ROOT}\",\"capabilities\":{\"window\":{\"workDoneProgress\":true}}}"
     lsts_recv_response
 
-    # Fail fast if the server returned a JSON-RPC error
+    # Fail fast if the server returned a JSON-RPC error.
     local err
     err="$(echo "$LSTS_RESPONSE" | jq -r '.error')"
     [[ "$err" == "null" ]] || {
@@ -174,36 +197,43 @@ _lsts_pos_request() {
         "$fixture"
 }
 
+# lsts_hover <path> <line> <character> [fixture-path]
 lsts_hover() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/hover" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_definition <path> <line> <character> [fixture-path]
 lsts_definition() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/definition" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_declaration <path> <line> <character> [fixture-path]
 lsts_declaration() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/declaration" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_type_definition <path> <line> <character> [fixture-path]
 lsts_type_definition() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/typeDefinition" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_implementation <path> <line> <character> [fixture-path]
 lsts_implementation() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/implementation" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_document_highlight <path> <line> <character> [fixture-path]
 lsts_document_highlight() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/documentHighlight" "$path" "$line" "$character" "$fixture"
 }
 
+# lsts_signature_help <path> <line> <character> [fixture-path]
 lsts_signature_help() {
     local path="$1" line="$2" character="$3" fixture="${4:-}"
     _lsts_pos_request "textDocument/signatureHelp" "$path" "$line" "$character" "$fixture"
