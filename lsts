@@ -292,3 +292,48 @@ lsts_code_action() {
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"range\":{\"start\":{\"line\":${sl},\"character\":${sc}},\"end\":{\"line\":${el},\"character\":${ec}}},\"context\":{\"diagnostics\":[]}}" \
         "$fixture"
 }
+
+# lsts_call_hierarchy_prepare <path> <line> <character> [fixture-path]
+# Sends textDocument/prepareCallHierarchy and stores the first item in
+# LSTS_CALL_HIERARCHY_ITEM for use with lsts_incoming_calls / lsts_outgoing_calls.
+lsts_call_hierarchy_prepare() {
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    _lsts_pos_request "textDocument/prepareCallHierarchy" "$path" "$line" "$character" "$fixture"
+    LSTS_CALL_HIERARCHY_ITEM="$(printf '%s' "$LSTS_RESPONSE" | jq -c '.result[0]')"
+}
+
+# lsts_incoming_calls <item-json> [fixture-path]
+# Sends callHierarchy/incomingCalls for the given CallHierarchyItem.
+# Requires lsts_initialize and lsts_open to have been called already.
+lsts_incoming_calls() {
+    local item="$1" fixture="${2:-}"
+    lsts_request "callHierarchy/incomingCalls" "{\"item\":${item}}"
+    lsts_recv_response
+    _lsts_fixture_or_print "$fixture"
+}
+
+# lsts_outgoing_calls <item-json> [fixture-path]
+# Sends callHierarchy/outgoingCalls for the given CallHierarchyItem.
+# Requires lsts_initialize and lsts_open to have been called already.
+lsts_outgoing_calls() {
+    local item="$1" fixture="${2:-}"
+    lsts_request "callHierarchy/outgoingCalls" "{\"item\":${item}}"
+    lsts_recv_response
+    _lsts_fixture_or_print "$fixture"
+}
+
+# lsts_goto_incoming_calls <path> <line> <character> [fixture-path]
+# Full two-step helper: prepareCallHierarchy then incomingCalls.
+lsts_goto_incoming_calls() {
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    lsts_call_hierarchy_prepare "$path" "$line" "$character"
+    lsts_incoming_calls "$LSTS_CALL_HIERARCHY_ITEM" "$fixture"
+}
+
+# lsts_goto_outgoing_calls <path> <line> <character> [fixture-path]
+# Full two-step helper: prepareCallHierarchy then outgoingCalls.
+lsts_goto_outgoing_calls() {
+    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    lsts_call_hierarchy_prepare "$path" "$line" "$character"
+    lsts_outgoing_calls "$LSTS_CALL_HIERARCHY_ITEM" "$fixture"
+}
