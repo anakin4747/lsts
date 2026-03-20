@@ -118,7 +118,9 @@ pass() {
   local TIMING="${1:-}"
   move_up $line_backoff_count
   go_to_column 0
-  buffer ' ✓ %s' "$name"
+  set_color 2
+  buffer ' %s' "$name"
+  clear_color
   suffix_location
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
@@ -140,10 +142,11 @@ skip() {
 
 fail() {
   local TIMING="${1:-}"
-  set_color 1 bold
   move_up $line_backoff_count
   go_to_column 0
-  buffer ' ✗ %s' "$name"
+  set_color 1 bold
+  buffer ' %s' "$name"
+  clear_color
   suffix_location
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
