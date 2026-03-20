@@ -37,6 +37,14 @@ lsts_set_langId() {
 
 _LSTS_ID=0
 
+# lsts_print_test_location
+# Print the file:line:description of the current @test to bats output (FD 3).
+lsts_print_test_location() {
+    local line
+    line=$(awk -v desc="$BATS_TEST_DESCRIPTION" '$0 ~ "\"" desc "\"" {print NR; exit}' "$BATS_TEST_FILENAME")
+    echo "# $BATS_TEST_FILENAME:$line: $BATS_TEST_DESCRIPTION" >&3
+}
+
 # lsts_send <body>
 # Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
@@ -113,7 +121,6 @@ lsts_start() {
 
     cd "$LSTS_ROOT" || return 1
 
-    _LSTS_ID=0
     coproc LSTS { ${LSTS_CMD}; }
     LSTS_READ_FD=${LSTS[0]}
     LSTS_WRITE_FD=${LSTS[1]}
