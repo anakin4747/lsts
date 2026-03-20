@@ -7,6 +7,7 @@ lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/lua"
 lsts_set_langId "lua"
 
 setup() {
+    lsts_print_test_location
     lsts_start
 }
 
