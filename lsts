@@ -250,9 +250,7 @@ lsts_completion() {
 
 # lsts_references <path> <line> <character> [include-declaration:true|false] [fixture-path]
 lsts_references() {
-    local path="$1" line="$2" character="$3"
-    local include_decl="${4:-true}"
-    local fixture="${5:-}"
+    local path="$1" line="$2" character="$3" include_decl="${4:-true}" fixture="${5:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/references" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"includeDeclaration\":${include_decl}}}" \
@@ -270,10 +268,7 @@ lsts_document_symbols() {
 
 # lsts_formatting <path> [tab-size] [insert-spaces] [fixture-path]
 lsts_formatting() {
-    local path="$1"
-    local tab_size="${2:-4}"
-    local insert_spaces="${3:-true}"
-    local fixture="${4:-}"
+    local path="$1" tab_size="${2:-4}" insert_spaces="${3:-true}" fixture="${4:-}"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/formatting" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"options\":{\"tabSize\":${tab_size},\"insertSpaces\":${insert_spaces}}}" \
