@@ -7,7 +7,6 @@ lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/nix"
 lsts_set_langId "nix"
 
 setup() {
-    lsts_print_test_location
     lsts_start
 }
 
