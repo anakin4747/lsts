@@ -119,8 +119,9 @@ pass() {
   move_up $line_backoff_count
   go_to_column 0
   set_color 2
-  buffer ' %s' "$name"
+  buffer ' SUCCESS'
   clear_color
+  buffer ' %s' "$name"
   suffix_location
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
@@ -145,8 +146,9 @@ fail() {
   move_up $line_backoff_count
   go_to_column 0
   set_color 1 bold
-  buffer ' %s' "$name"
+  buffer ' FAILURE'
   clear_color
+  buffer ' %s' "$name"
   suffix_location
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
