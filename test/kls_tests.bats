@@ -7,6 +7,7 @@ lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/kconfig"
 lsts_set_langId "kconfig"
 
 setup() {
+    lsts_print_test_location
     lsts_start
 }
 
