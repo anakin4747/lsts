@@ -42,7 +42,7 @@ _LSTS_ID=0
 lsts_print_test_location() {
     local line
     line=$(awk -v desc="$BATS_TEST_DESCRIPTION" '$0 ~ "\"" desc "\"" {print NR; exit}' "$BATS_TEST_FILENAME")
-    echo "# $BATS_TEST_FILENAME:$line: $BATS_TEST_DESCRIPTION" >&3
+    echo "# $BATS_TEST_FILENAME:$line" >&3
 }
 
 # lsts_send <body>
