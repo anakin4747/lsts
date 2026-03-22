@@ -186,10 +186,12 @@ _lsts_doc_request() {
     _lsts_fixture_or_print "$fixture"
 }
 
-# _lsts_pos_request <method> <path> <line> <character> [fixture-path]
+# _lsts_pos_request <method> <path:line:character> [fixture-path]
 # Internal helper for position-based requests.
 _lsts_pos_request() {
-    local method="$1" path="$2" line="$3" character="$4" fixture="${5:-}"
+    local method="$1" input="$2" fixture="${3:-}"
+    local path line character
+    IFS=: read -r path line character <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
 
     _lsts_doc_request "$method" "$path" \
@@ -197,60 +199,57 @@ _lsts_pos_request() {
         "$fixture"
 }
 
-# lsts_hover <path> <line> <character> [fixture-path]
+# lsts_hover <path:line:character> [fixture-path]
 lsts_hover() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/hover" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/hover" "$1" "${2:-}"
 }
 
-# lsts_definition <path> <line> <character> [fixture-path]
+# lsts_definition <path:line:character> [fixture-path]
 lsts_definition() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/definition" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/definition" "$1" "${2:-}"
 }
 
-# lsts_declaration <path> <line> <character> [fixture-path]
+# lsts_declaration <path:line:character> [fixture-path]
 lsts_declaration() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/declaration" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/declaration" "$1" "${2:-}"
 }
 
-# lsts_type_definition <path> <line> <character> [fixture-path]
+# lsts_type_definition <path:line:character> [fixture-path]
 lsts_type_definition() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/typeDefinition" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/typeDefinition" "$1" "${2:-}"
 }
 
-# lsts_implementation <path> <line> <character> [fixture-path]
+# lsts_implementation <path:line:character> [fixture-path]
 lsts_implementation() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/implementation" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/implementation" "$1" "${2:-}"
 }
 
-# lsts_document_highlight <path> <line> <character> [fixture-path]
+# lsts_document_highlight <path:line:character> [fixture-path]
 lsts_document_highlight() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/documentHighlight" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/documentHighlight" "$1" "${2:-}"
 }
 
-# lsts_signature_help <path> <line> <character> [fixture-path]
+# lsts_signature_help <path:line:character> [fixture-path]
 lsts_signature_help() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/signatureHelp" "$path" "$line" "$character" "$fixture"
+    _lsts_pos_request "textDocument/signatureHelp" "$1" "${2:-}"
 }
 
-# lsts_completion <path> <line> <character> [fixture-path]
+# lsts_completion <path:line:character> [fixture-path]
 lsts_completion() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
+    local input="$1" fixture="${2:-}"
+    local path line character
+    IFS=: read -r path line character <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/completion" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"triggerKind\":1}}" \
         "$fixture"
 }
 
-# lsts_references <path> <line> <character> [include-declaration:true|false] [fixture-path]
+# lsts_references <path:line:character> [include-declaration:true|false] [fixture-path]
 lsts_references() {
-    local path="$1" line="$2" character="$3" include_decl="${4:-true}" fixture="${5:-}"
+    local input="$1" include_decl="${2:-true}" fixture="${3:-}"
+    local path line character
+    IFS=: read -r path line character <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/references" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"context\":{\"includeDeclaration\":${include_decl}}}" \
@@ -275,30 +274,34 @@ lsts_formatting() {
         "$fixture"
 }
 
-# lsts_rename <path> <line> <character> <new-name> [fixture-path]
+# lsts_rename <path:line:character> <new-name> [fixture-path]
 lsts_rename() {
-    local path="$1" line="$2" character="$3" new_name="$4" fixture="${5:-}"
+    local input="$1" new_name="$2" fixture="${3:-}"
+    local path line character
+    IFS=: read -r path line character <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/rename" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}},\"newName\":\"${new_name}\"}" \
         "$fixture"
 }
 
-# lsts_code_action <path> <start-line> <start-char> <end-line> <end-char> [fixture-path]
+# lsts_code_action <path:start-line:start-char:end-line:end-char> [fixture-path]
 lsts_code_action() {
-    local path="$1" sl="$2" sc="$3" el="$4" ec="$5" fixture="${6:-}"
+    local input="$1" fixture="${2:-}"
+    local path sl sc el ec
+    IFS=: read -r path sl sc el ec <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
     _lsts_doc_request "textDocument/codeAction" "$path" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"range\":{\"start\":{\"line\":${sl},\"character\":${sc}},\"end\":{\"line\":${el},\"character\":${ec}}},\"context\":{\"diagnostics\":[]}}" \
         "$fixture"
 }
 
-# lsts_call_hierarchy_prepare <path> <line> <character> [fixture-path]
+# lsts_call_hierarchy_prepare <path:line:character> [fixture-path]
 # Sends textDocument/prepareCallHierarchy and stores the first item in
 # LSTS_CALL_HIERARCHY_ITEM for use with lsts_incoming_calls / lsts_outgoing_calls.
 lsts_call_hierarchy_prepare() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_pos_request "textDocument/prepareCallHierarchy" "$path" "$line" "$character" "$fixture"
+    local input="$1" fixture="${2:-}"
+    _lsts_pos_request "textDocument/prepareCallHierarchy" "$input" "$fixture"
     LSTS_CALL_HIERARCHY_ITEM="$(printf '%s' "$LSTS_RESPONSE" | jq -c '.result[0]')"
 }
 
@@ -322,11 +325,13 @@ lsts_outgoing_calls() {
     _lsts_fixture_or_print "$fixture"
 }
 
-# _lsts_prepare_call_hierarchy <path> <line> <character>
+# _lsts_prepare_call_hierarchy <path:line:character>
 # Internal helper: initialize, open, and run prepareCallHierarchy silently.
 # Stores the first CallHierarchyItem in LSTS_CALL_HIERARCHY_ITEM.
 _lsts_prepare_call_hierarchy() {
-    local path="$1" line="$2" character="$3"
+    local input="$1"
+    local path line character
+    IFS=: read -r path line character <<< "$input"
     local uri="file://$LSTS_ROOT/$path"
     lsts_initialize
     lsts_open "$path"
@@ -336,18 +341,18 @@ _lsts_prepare_call_hierarchy() {
     LSTS_CALL_HIERARCHY_ITEM="$(printf '%s' "$LSTS_RESPONSE" | jq -c '.result[0]')"
 }
 
-# lsts_goto_incoming_calls <path> <line> <character> [fixture-path]
+# lsts_goto_incoming_calls <path:line:character> [fixture-path]
 # Full two-step helper: prepareCallHierarchy then incomingCalls.
 lsts_goto_incoming_calls() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_prepare_call_hierarchy "$path" "$line" "$character"
+    local input="$1" fixture="${2:-}"
+    _lsts_prepare_call_hierarchy "$input"
     lsts_incoming_calls "$LSTS_CALL_HIERARCHY_ITEM" "$fixture"
 }
 
-# lsts_goto_outgoing_calls <path> <line> <character> [fixture-path]
+# lsts_goto_outgoing_calls <path:line:character> [fixture-path]
 # Full two-step helper: prepareCallHierarchy then outgoingCalls.
 lsts_goto_outgoing_calls() {
-    local path="$1" line="$2" character="$3" fixture="${4:-}"
-    _lsts_prepare_call_hierarchy "$path" "$line" "$character"
+    local input="$1" fixture="${2:-}"
+    _lsts_prepare_call_hierarchy "$input"
     lsts_outgoing_calls "$LSTS_CALL_HIERARCHY_ITEM" "$fixture"
 }
