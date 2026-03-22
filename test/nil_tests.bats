@@ -19,19 +19,19 @@ teardown() {
 }
 
 @test "hover on 'greeting' returns documentation" {
-    lsts_hover "main.nix" 3 6 "hover.rpc.json"
+    lsts_hover "main.nix:3:6" "hover.rpc.json"
 }
 
 @test "dummy hover to emit warning for snapshot mode" {
-    lsts_hover "main.nix" 3 6 > "hover.rpc.json"
+    lsts_hover "main.nix:3:6" > "hover.rpc.json"
 }
 
 @test "completion in let block returns items" {
-    lsts_completion "main.nix" 3 6 "completion.rpc.json"
+    lsts_completion "main.nix:3:6" "completion.rpc.json"
 }
 
 @test "dummy completion to emit warning for snapshot mode" {
-    lsts_completion "main.nix" 3 6 > "completion.rpc.json"
+    lsts_completion "main.nix:3:6" > "completion.rpc.json"
 }
 
 @test "document symbols lists top-level bindings" {
@@ -43,17 +43,17 @@ teardown() {
 }
 
 @test "references to 'greeting' returns all uses" {
-    lsts_references "main.nix" 3 6 "true" "references.rpc.json"
+    lsts_references "main.nix:3:6" "true" "references.rpc.json"
 }
 
 @test "dummy references to emit warning for snapshot mode" {
-    lsts_references "main.nix" 3 6 "true" > "references.rpc.json"
+    lsts_references "main.nix:3:6" "true" > "references.rpc.json"
 }
 
 @test "rename 'greeting' produces workspace edit" {
-    lsts_rename "main.nix" 3 6 "msg" "rename.rpc.json"
+    lsts_rename "main.nix:3:6" "msg" "rename.rpc.json"
 }
 
 @test "dummy rename to emit warning for snapshot mode" {
-    lsts_rename "main.nix" 3 6 "msg" > "rename.rpc.json"
+    lsts_rename "main.nix:3:6" "msg" > "rename.rpc.json"
 }

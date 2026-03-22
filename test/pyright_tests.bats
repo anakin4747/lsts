@@ -19,19 +19,19 @@ teardown() {
 }
 
 @test "hover on 'len' returns documentation" {
-    lsts_hover "main.py" 1 8 "hover.rpc.json"
+    lsts_hover "main.py:1:8" "hover.rpc.json"
 }
 
 @test "dummy hover to emit warning for snapshot mode" {
-    lsts_hover "main.py" 1 8 > "hover.rpc.json"
+    lsts_hover "main.py:1:8" > "hover.rpc.json"
 }
 
 @test "completion at start of line returns items" {
-    lsts_completion "main.py" 2 0 "completion.rpc.json"
+    lsts_completion "main.py:2:0" "completion.rpc.json"
 }
 
 @test "dummy completion to emit warning for snapshot mode" {
-    lsts_completion "main.py" 2 0 > "completion.rpc.json"
+    lsts_completion "main.py:2:0" > "completion.rpc.json"
 }
 
 @test "document symbols lists module-level names" {
@@ -43,33 +43,33 @@ teardown() {
 }
 
 @test "references to 'items' returns all uses" {
-    lsts_references "main.py" 0 0 "true" "references.rpc.json"
+    lsts_references "main.py:0:0" "true" "references.rpc.json"
 }
 
 @test "dummy references to emit warning for snapshot mode" {
-    lsts_references "main.py" 0 0 "true" > "references.rpc.json"
+    lsts_references "main.py:0:0" "true" > "references.rpc.json"
 }
 
 @test "signature help inside len() returns signatures" {
-    lsts_signature_help "main.py" 1 10 "signature_help.rpc.json"
+    lsts_signature_help "main.py:1:10" "signature_help.rpc.json"
 }
 
 @test "dummy signature_help to emit warning for snapshot mode" {
-    lsts_signature_help "main.py" 1 10 > "signature_help.rpc.json"
+    lsts_signature_help "main.py:1:10" > "signature_help.rpc.json"
 }
 
 @test "document highlight on 'items' marks all occurrences" {
-    lsts_document_highlight "main.py" 0 0 "document_highlight.rpc.json"
+    lsts_document_highlight "main.py:0:0" "document_highlight.rpc.json"
 }
 
 @test "dummy document_highlight to emit warning for snapshot mode" {
-    lsts_document_highlight "main.py" 0 0 > "document_highlight.rpc.json"
+    lsts_document_highlight "main.py:0:0" > "document_highlight.rpc.json"
 }
 
 @test "rename 'items' produces workspace edit" {
-    lsts_rename "main.py" 0 0 "elements" "rename.rpc.json"
+    lsts_rename "main.py:0:0" "elements" "rename.rpc.json"
 }
 
 @test "dummy rename to emit warning for snapshot mode" {
-    lsts_rename "main.py" 0 0 "elements" > "rename.rpc.json"
+    lsts_rename "main.py:0:0" "elements" > "rename.rpc.json"
 }
