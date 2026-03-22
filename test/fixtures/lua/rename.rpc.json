@@ -1,1 +1,1 @@
-{"id":2,"jsonrpc":"2.0","result":{"changes":{"file:///home/kin/src/lsts/test/fixtures/lua/main.lua":[{"newText":"n","range":{"end":{"character":11,"line":1},"start":{"character":6,"line":1}}},{"newText":"n","range":{"end":{"character":11,"line":2},"start":{"character":6,"line":2}}}]}}}
+{"id":2,"jsonrpc":"2.0","result":{"changes":{"file://$LSTS_ROOT/main.lua":[{"newText":"n","range":{"end":{"character":11,"line":1},"start":{"character":6,"line":1}}},{"newText":"n","range":{"end":{"character":11,"line":2},"start":{"character":6,"line":2}}}]}}}
