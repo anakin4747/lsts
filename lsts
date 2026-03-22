@@ -37,6 +37,10 @@ lsts_set_langId() {
 
 _LSTS_ID=0
 
+# Placeholder substituted for the workspace root URI (file://$LSTS_ROOT) in
+# fixture files, making snapshots portable across machines and checkout paths.
+LSTS_ROOT_PLACEHOLDER="file://\$LSTS_ROOT"
+
 # lsts_send <body>
 # Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
@@ -160,10 +164,20 @@ lsts_open() {
         "{\"textDocument\":{\"uri\":\"${uri}\",\"languageId\":\"${LSTS_LANG_ID}\",\"version\":1,\"text\":${text}}}"
 }
 
+# _lsts_normalize
+# Replace the workspace root URI with the placeholder $LSTS_ROOT_PLACEHOLDER in
+# LSTS_RESPONSE so that fixture files are portable across machines and checkout
+# paths. Sets LSTS_RESPONSE in place.
+_lsts_normalize() {
+    LSTS_RESPONSE="${LSTS_RESPONSE//"file://$LSTS_ROOT"/$LSTS_ROOT_PLACEHOLDER}"
+}
+
 # _lsts_fixture_or_print [fixture-path]
-# Diff LSTS_RESPONSE against fixture-path, or print it (snapshot mode) if omitted.
+# Normalize LSTS_RESPONSE, then diff against fixture-path or print it (snapshot
+# mode) if omitted.
 _lsts_fixture_or_print() {
     local fixture="${1:-}"
+    _lsts_normalize
     if [[ -z "$fixture" ]]; then
         printf "\e[01;33m WARNING\e[0m previous test in snapshot mode\n" >&3
         echo "$LSTS_RESPONSE"
