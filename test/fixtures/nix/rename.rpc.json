@@ -1,1 +1,1 @@
-{"jsonrpc":"2.0","id":2,"result":{"changes":{"file:///home/kin/src/lsts/test/fixtures/nix/main.nix":[{"newText":"msg","range":{"end":{"character":10,"line":3},"start":{"character":2,"line":3}}},{"newText":"msg","range":{"end":{"character":34,"line":5},"start":{"character":26,"line":5}}}]}}}
+{"jsonrpc":"2.0","id":2,"result":{"changes":{"file://$LSTS_ROOT/main.nix":[{"newText":"msg","range":{"end":{"character":10,"line":3},"start":{"character":2,"line":3}}},{"newText":"msg","range":{"end":{"character":34,"line":5},"start":{"character":26,"line":5}}}]}}}

@@ -1,1 +1,1 @@
-{"jsonrpc":"2.0","result":[{"uri":"file:///home/kin/src/lsts/test/fixtures/go/main.go","range":{"start":{"line":2,"character":7},"end":{"line":2,"character":12}}},{"uri":"file:///home/kin/src/lsts/test/fixtures/go/main.go","range":{"start":{"line":5,"character":1},"end":{"line":5,"character":4}}}],"id":2}
+{"jsonrpc":"2.0","result":[{"uri":"file://$LSTS_ROOT/main.go","range":{"start":{"line":2,"character":7},"end":{"line":2,"character":12}}},{"uri":"file://$LSTS_ROOT/main.go","range":{"start":{"line":5,"character":1},"end":{"line":5,"character":4}}}],"id":2}
