@@ -19,11 +19,11 @@ teardown() {
 }
 
 @test "hover on 'config' keyword returns documentation" {
-    lsts_hover "test.Kconfig:0:0" "hover.rpc.json"
+    lsts_hover "test.Kconfig:1:1" "hover.rpc.json"
 }
 
 @test "dummy hover to emit warning for snapshot mode" {
-    lsts_hover "test.Kconfig:0:0" > "hover.rpc.json"
+    lsts_hover "test.Kconfig:1:1" > "hover.rpc.json"
 }
 
 
