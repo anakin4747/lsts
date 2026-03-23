@@ -5,6 +5,9 @@ source lsts
 lsts_set_cmd "gopls"
 lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/go"
 lsts_set_langId "go"
+lsts_add_filter \
+    "file:///nix/store/[a-z0-9]*-go-[0-9.]*/share/go" \
+    "file://\$GOROOT"
 
 setup() {
     lsts_start
