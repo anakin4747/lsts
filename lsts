@@ -92,17 +92,30 @@ lsts_recv() {
 
     # Some servers (e.g. kconfig-language-server) emit literal control
     # characters (newline, tab, etc.) inside JSON string values, which is
-    # invalid per RFC 8259.  Escape them before handing the body to jq.
-    LSTS_RESPONSE="$(printf '%s' "$raw" | perl -0777 -pe '
-        s{("(?:[^"\\]|\\.)*")}{
-            my $s = $1;
-            $s =~ s/\n/\\n/g;
-            $s =~ s/\r/\\r/g;
-            $s =~ s/\t/\\t/g;
-            $s =~ s/([\x00-\x08\x0b\x0c\x0e-\x1f])/sprintf("\\u%04x",ord($1))/ge;
-            $s
-        }gex
-    ' | jq -c .)"
+    # invalid per RFC 8259.  Use a jq state machine to escape them before
+    # parsing: walk each character, tracking whether we are inside a string,
+    # and replace bare \n/\r/\t with their JSON escape sequences.
+    LSTS_RESPONSE="$(printf '%s' "$raw" | jq -Rsc '
+        explode |
+        reduce .[] as $c (
+            {out: [], in_str: false, escape: false};
+            if .escape then
+                {out: (.out + [$c]), in_str: .in_str, escape: false}
+            elif $c == 92 then
+                {out: (.out + [$c]), in_str: .in_str, escape: .in_str}
+            elif $c == 34 then
+                {out: (.out + [$c]), in_str: (.in_str | not), escape: false}
+            elif .in_str and $c == 9 then
+                {out: (.out + [92, 116]), in_str: true, escape: false}
+            elif .in_str and $c == 10 then
+                {out: (.out + [92, 110]), in_str: true, escape: false}
+            elif .in_str and $c == 13 then
+                {out: (.out + [92, 114]), in_str: true, escape: false}
+            else
+                {out: (.out + [$c]), in_str: .in_str, escape: false}
+            end
+        ) | .out | implode | fromjson
+    ')"
 }
 
 # lsts_recv_response
