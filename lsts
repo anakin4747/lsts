@@ -90,7 +90,19 @@ lsts_recv() {
 
     IFS= read -r -N "$content_length" -t "${LSTS_TIMEOUT:-10}" raw <&"$LSTS_READ_FD"
 
-    LSTS_RESPONSE="$(printf '%s' "$raw" | jq -c .)"
+    # Some servers (e.g. kconfig-language-server) emit literal control
+    # characters (newline, tab, etc.) inside JSON string values, which is
+    # invalid per RFC 8259.  Escape them before handing the body to jq.
+    LSTS_RESPONSE="$(printf '%s' "$raw" | perl -0777 -pe '
+        s{("(?:[^"\\]|\\.)*")}{
+            my $s = $1;
+            $s =~ s/\n/\\n/g;
+            $s =~ s/\r/\\r/g;
+            $s =~ s/\t/\\t/g;
+            $s =~ s/([\x00-\x08\x0b\x0c\x0e-\x1f])/sprintf("\\u%04x",ord($1))/ge;
+            $s
+        }gex
+    ' | jq -c .)"
 }
 
 # lsts_recv_response
