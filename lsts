@@ -70,7 +70,7 @@ lsts_recv() {
 
     IFS= read -r -N "$content_length" -t "${LSTS_TIMEOUT:-10}" raw <&"$LSTS_READ_FD"
 
-    LSTS_RESPONSE="$(printf '%s' "$raw" | tr '\t\n' '  ')"
+    LSTS_RESPONSE="$(printf '%s' "$raw" | jq -c .)"
 }
 
 # lsts_recv_response
