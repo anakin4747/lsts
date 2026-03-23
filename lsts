@@ -76,8 +76,12 @@ lsts_recv() {
 # lsts_recv_response
 # Read messages until a JSON-RPC response (has "id", no "method") is received,
 # auto-replying to any server-to-client requests encountered along the way.
+# The loop aborts with an error if no response arrives within LSTS_TIMEOUT
+# seconds (default 10).
 lsts_recv_response() {
-    while true; do
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
         lsts_recv || return 1
         # Server-to-client requests have both "id" and "method". Reply with an
         # empty result so the server can continue, then keep waiting.
@@ -91,6 +95,8 @@ lsts_recv_response() {
         # A proper response has "id" but no "method".
         printf '%s' "$LSTS_RESPONSE" | jq -e 'has("id")' >/dev/null 2>&1 && return 0
     done
+    echo "lsts_recv_response: timed out after ${_timeout}s waiting for a response" >&2
+    return 1
 }
 
 # lsts_request <method> <params-json>
