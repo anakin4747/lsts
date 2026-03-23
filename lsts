@@ -427,3 +427,66 @@ lsts_goto_outgoing_calls() {
     _lsts_prepare_call_hierarchy "$input"
     lsts_outgoing_calls "$LSTS_CALL_HIERARCHY_ITEM" "$fixture"
 }
+
+# _lsts_recv_notification <method>
+# Read messages until a notification with the given method is received,
+# auto-replying to any server-to-client requests along the way.
+# Aborts with an error if no matching notification arrives within LSTS_TIMEOUT
+# seconds (default 10). Stores the notification in LSTS_RESPONSE.
+_lsts_recv_notification() {
+    local target_method="$1"
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
+        lsts_recv || return 1
+        # Server-to-client requests have both "id" and "method". Reply so the
+        # server can continue, then keep waiting.
+        if printf '%s' "$LSTS_RESPONSE" | \
+                jq -e 'has("id") and has("method")' >/dev/null 2>&1; then
+            local req_id
+            req_id="$(printf '%s' "$LSTS_RESPONSE" | jq -r '.id')"
+            lsts_send "{\"jsonrpc\":\"2.0\",\"id\":${req_id},\"result\":null}"
+            continue
+        fi
+        # Notifications have no "id". Check if the method matches.
+        if printf '%s' "$LSTS_RESPONSE" | \
+                jq -e --arg m "$target_method" \
+                    'has("method") and .method == $m' >/dev/null 2>&1; then
+            return 0
+        fi
+    done
+    echo "_lsts_recv_notification: timed out after ${_timeout}s waiting for ${target_method}" >&2
+    return 1
+}
+
+# lsts_diagnostics <path> [fixture-path]
+# Initialize, open a document, and wait for the server's
+# textDocument/publishDiagnostics notification for that file.
+# Fails if no diagnostics notification arrives within LSTS_TIMEOUT seconds,
+# or if the notification contains an empty diagnostics array.
+lsts_diagnostics() {
+    local path="$1" fixture="${2:-}"
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    # Consume notifications until we get publishDiagnostics for our file.
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
+        _lsts_recv_notification "textDocument/publishDiagnostics" || return 1
+        printf '%s' "$LSTS_RESPONSE" | \
+            jq -e --arg uri "$uri" '.params.uri == $uri' >/dev/null 2>&1 && break
+    done
+
+    # Require at least one diagnostic — an empty array means no errors were
+    # reported, which indicates the file under test has no syntax errors.
+    printf '%s' "$LSTS_RESPONSE" | \
+        jq -e '.params.diagnostics | length > 0' >/dev/null 2>&1 || {
+        echo "lsts_diagnostics: server reported no diagnostics for $path" >&2
+        return 1
+    }
+
+    _lsts_fixture_or_print "$fixture"
+}
