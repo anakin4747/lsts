@@ -45,3 +45,7 @@ teardown() {
 @test "rename 'items' produces workspace edit" {
     lsts_rename "main.py:1:1" "elements" "rename.rpc.json"
 }
+
+@test "type error in 'invalid.py' produces diagnostics" {
+    lsts_diagnostics "invalid.py" "diagnostics.rpc.json"
+}
