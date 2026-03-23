@@ -125,7 +125,7 @@ lsts_start() {
 # lsts_stop
 # Gracefully shut down the language server and reap the coprocess.
 lsts_stop() {
-    lsts_notify "exit" "{}" 2>/dev/null || true
+    lsts_notify "exit" "null" 2>/dev/null || true
     kill "${LSTS_PID:-}" 2>/dev/null || true
     wait "${LSTS_PID:-}" 2>/dev/null || true
 }
