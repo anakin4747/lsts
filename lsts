@@ -41,6 +41,26 @@ _LSTS_ID=0
 # fixture files, making snapshots portable across machines and checkout paths.
 LSTS_ROOT_PLACEHOLDER="file://\$LSTS_ROOT"
 
+# Registry of additional sed substitutions applied by _lsts_normalize.
+# Each entry is a sed expression of the form s|pattern|replacement|g.
+# Populated by lsts_add_filter.
+_LSTS_FILTERS=()
+
+# lsts_add_filter <pattern> <replacement>
+# Register an additional substitution applied to LSTS_RESPONSE before fixture
+# comparison. Use this to replace machine-specific paths (e.g. nix store
+# paths, tool installation directories) with portable placeholders.
+#
+# Example:
+#   lsts_add_filter "/nix/store/[a-z0-9]*-go-[0-9.]*/share/go" "\$GOROOT"
+lsts_add_filter() {
+    [[ $# == 2 ]] || {
+        echo "lsts_add_filter requires a pattern and a replacement"
+        exit 1
+    }
+    _LSTS_FILTERS+=("s|${1}|${2}|g")
+}
+
 # lsts_send <body>
 # Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
@@ -171,11 +191,13 @@ lsts_open() {
 }
 
 # _lsts_normalize
-# Replace the workspace root URI with the placeholder $LSTS_ROOT_PLACEHOLDER in
-# LSTS_RESPONSE so that fixture files are portable across machines and checkout
-# paths. Sets LSTS_RESPONSE in place.
+# Replace the workspace root URI with the placeholder $LSTS_ROOT_PLACEHOLDER,
+# then apply any filters registered via lsts_add_filter, in LSTS_RESPONSE.
 _lsts_normalize() {
     LSTS_RESPONSE="${LSTS_RESPONSE//"file://$LSTS_ROOT"/$LSTS_ROOT_PLACEHOLDER}"
+    if [[ ${#_LSTS_FILTERS[@]} -gt 0 ]]; then
+        LSTS_RESPONSE="$(printf '%s' "$LSTS_RESPONSE" | sed "${_LSTS_FILTERS[@]/#/-e }")"
+    fi
 }
 
 # _lsts_fixture_or_print [fixture-path]
