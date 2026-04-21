@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export LC_ALL=C
+
 # lsts_set_cmd <command>
 # Set the command used to start the language server under test.
 lsts_set_cmd() {
