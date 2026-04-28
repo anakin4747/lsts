@@ -487,3 +487,16 @@ lsts_diagnostics() {
 
     _lsts_fixture_or_print "$fixture"
 }
+
+# lsts_initialize_capability <jq-expr>
+# Initialize and assert that the server's capabilities satisfy <jq-expr>.
+# The expression is evaluated against the full initialize response; use
+# .result.capabilities to navigate to capability fields.
+#
+#   lsts_initialize_capability '.result.capabilities.hoverProvider == true'
+#   lsts_initialize_capability '.result.capabilities.textDocumentSync.change == 1'
+lsts_initialize_capability() {
+    local expr="$1"
+    lsts_initialize
+    echo "$LSTS_RESPONSE" | jq -e "$expr" > /dev/null
+}
