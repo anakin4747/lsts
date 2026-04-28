@@ -532,3 +532,26 @@ lsts_diagnostics_none() {
 
     _lsts_fixture_or_print "$fixture"
 }
+
+# lsts_change <path> <version> <new-text-path> [fixture-path]
+# Send a textDocument/didChange notification with full-sync content taken
+# from <new-text-path>, then wait for the server's publishDiagnostics
+# notification for the changed file. Requires lsts_initialize and lsts_open
+# to have been called first.
+#
+#   lsts_open "fixtures/original.wks"
+#   _lsts_recv_notification "textDocument/publishDiagnostics"
+#   lsts_change "fixtures/original.wks" 2 "fixtures/updated.wks" "fixtures/updated.rpc.json"
+lsts_change() {
+    local path="$1" version="$2" new_text_path="$3" fixture="${4:-}"
+    local uri="file://$LSTS_ROOT/$path"
+    local new_text
+    new_text="$(jq -Rs . <"$LSTS_ROOT/$new_text_path")"
+
+    lsts_notify "textDocument/didChange" \
+        "{\"textDocument\":{\"uri\":\"${uri}\",\"version\":${version}},\"contentChanges\":[{\"text\":${new_text}}]}"
+
+    _lsts_recv_notification "textDocument/publishDiagnostics"
+
+    _lsts_fixture_or_print "$fixture"
+}
