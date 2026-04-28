@@ -500,3 +500,35 @@ lsts_initialize_capability() {
     lsts_initialize
     echo "$LSTS_RESPONSE" | jq -e "$expr" > /dev/null
 }
+
+# lsts_diagnostics_none <path> [fixture-path]
+# Initialize, open a document, and wait for the server's
+# textDocument/publishDiagnostics notification for that file.
+# Fails if no notification arrives within LSTS_TIMEOUT seconds,
+# or if the notification contains any diagnostics (i.e. the document is
+# expected to be error-free).
+lsts_diagnostics_none() {
+    local path="$1" fixture="${2:-}"
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
+        lsts_recv || return 1
+        _lsts_reply_to_request && continue
+        printf '%s' "$LSTS_RESPONSE" | jq -e \
+            --arg m "textDocument/publishDiagnostics" --arg uri "$uri" \
+            '.method == $m and .params.uri == $uri' >/dev/null 2>&1 && break
+    done
+
+    printf '%s' "$LSTS_RESPONSE" | \
+        jq -e '.params.diagnostics | length == 0' >/dev/null 2>&1 || {
+        echo "lsts_diagnostics_none: server reported diagnostics for $path" >&2
+        return 1
+    }
+
+    _lsts_fixture_or_print "$fixture"
+}
