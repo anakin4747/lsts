@@ -487,3 +487,71 @@ lsts_diagnostics() {
 
     _lsts_fixture_or_print "$fixture"
 }
+
+# lsts_initialize_capability <jq-expr>
+# Initialize and assert that the server's capabilities satisfy <jq-expr>.
+# The expression is evaluated against the full initialize response; use
+# .result.capabilities to navigate to capability fields.
+#
+#   lsts_initialize_capability '.result.capabilities.hoverProvider == true'
+#   lsts_initialize_capability '.result.capabilities.textDocumentSync.change == 1'
+lsts_initialize_capability() {
+    local expr="$1"
+    lsts_initialize
+    echo "$LSTS_RESPONSE" | jq -e "$expr" > /dev/null
+}
+
+# lsts_diagnostics_none <path> [fixture-path]
+# Initialize, open a document, and wait for the server's
+# textDocument/publishDiagnostics notification for that file.
+# Fails if no notification arrives within LSTS_TIMEOUT seconds,
+# or if the notification contains any diagnostics (i.e. the document is
+# expected to be error-free).
+lsts_diagnostics_none() {
+    local path="$1" fixture="${2:-}"
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
+        lsts_recv || return 1
+        _lsts_reply_to_request && continue
+        printf '%s' "$LSTS_RESPONSE" | jq -e \
+            --arg m "textDocument/publishDiagnostics" --arg uri "$uri" \
+            '.method == $m and .params.uri == $uri' >/dev/null 2>&1 && break
+    done
+
+    printf '%s' "$LSTS_RESPONSE" | \
+        jq -e '.params.diagnostics | length == 0' >/dev/null 2>&1 || {
+        echo "lsts_diagnostics_none: server reported diagnostics for $path" >&2
+        return 1
+    }
+
+    _lsts_fixture_or_print "$fixture"
+}
+
+# lsts_change <path> <version> <new-text-path> [fixture-path]
+# Send a textDocument/didChange notification with full-sync content taken
+# from <new-text-path>, then wait for the server's publishDiagnostics
+# notification for the changed file. Requires lsts_initialize and lsts_open
+# to have been called first.
+#
+#   lsts_open "fixtures/original.wks"
+#   _lsts_recv_notification "textDocument/publishDiagnostics"
+#   lsts_change "fixtures/original.wks" 2 "fixtures/updated.wks" "fixtures/updated.rpc.json"
+lsts_change() {
+    local path="$1" version="$2" new_text_path="$3" fixture="${4:-}"
+    local uri="file://$LSTS_ROOT/$path"
+    local new_text
+    new_text="$(jq -Rs . <"$LSTS_ROOT/$new_text_path")"
+
+    lsts_notify "textDocument/didChange" \
+        "{\"textDocument\":{\"uri\":\"${uri}\",\"version\":${version}},\"contentChanges\":[{\"text\":${new_text}}]}"
+
+    _lsts_recv_notification "textDocument/publishDiagnostics"
+
+    _lsts_fixture_or_print "$fixture"
+}
