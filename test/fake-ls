@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# fake-ls — a scriptable fake LSP server for testing lsts.
+#
+# Reads LSP messages from stdin and dispatches to a handler function defined
+# in $FAKE_LS_SCRIPT. The script must define:
+#
+#   fake_ls_handle <method> <id-or-empty> <params-json>
+#
+# The handler should call one of:
+#   fake_ls_respond <json>       — send a JSON-RPC response with the current id
+#   fake_ls_notify <method> <params>  — send a server-initiated notification
+#   fake_ls_request <method> <params> — send a server-to-client request and
+#                                       consume the client reply
+#
+# If fake_ls_handle is not defined, a default handler is used that responds
+# to every request with {"result":null} and ignores notifications.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+export LC_ALL=C
+
+_current_id=""
+_req_counter=100
+
+_lsp_send() {
+    local body="$1"
+    local len="${#body}"
+    printf 'Content-Length: %d\r\n\r\n%s' "$len" "$body"
+}
+
+_lsp_recv() {
+    # reads one message into FAKE_MSG; returns 1 on EOF
+    local line content_length=0
+    FAKE_MSG=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%$'\r'}"
+        [[ -z "$line" ]] && break
+        if [[ "$line" =~ ^Content-Length:\ ([0-9]+)$ ]]; then
+            content_length="${BASH_REMATCH[1]}"
+        fi
+    done
+    [[ "$content_length" -eq 0 ]] && return 1
+    # read -N counts bytes in LC_ALL=C; a short read means the client closed
+    # the connection mid-message — treat it as EOF.
+    IFS= read -r -N "$content_length" FAKE_MSG || return 1
+}
+
+fake_ls_respond() {
+    local result="$1"
+    if [[ -z "$_current_id" ]]; then
+        echo "fake_ls_respond: no current request id" >&2
+        return 1
+    fi
+    _lsp_send "{\"jsonrpc\":\"2.0\",\"id\":${_current_id},\"result\":${result}}"
+}
+
+fake_ls_notify() {
+    local method="$1" params="$2"
+    _lsp_send "{\"jsonrpc\":\"2.0\",\"method\":\"${method}\",\"params\":${params}}"
+}
+
+fake_ls_request() {
+    local method="$1" params="$2"
+    local id=$(( _req_counter++ ))
+    _lsp_send "{\"jsonrpc\":\"2.0\",\"id\":${id},\"method\":\"${method}\",\"params\":${params}}"
+    # consume client reply; ignore failure — the client may not reply to all
+    # server-to-client requests in every test scenario.
+    _lsp_recv || true
+}
+
+_default_handle() {
+    local method="$1" id="$2"
+    # Only respond to requests (those with an id)
+    [[ -n "$id" ]] && fake_ls_respond "null"
+}
+
+[[ -n "${FAKE_LS_SCRIPT:-}" ]] && source "$FAKE_LS_SCRIPT"
+
+while _lsp_recv; do
+    _method="$(printf '%s' "$FAKE_MSG" | jq -r '.method // empty')"
+    _id="$(printf '%s' "$FAKE_MSG" | jq -r '.id // empty')"
+    _params="$(printf '%s' "$FAKE_MSG" | jq -c '.params // {}')"
+    _current_id="$_id"
+
+    if declare -f fake_ls_handle > /dev/null 2>&1; then
+        fake_ls_handle "$_method" "$_id" "$_params" || true
+    else
+        _default_handle "$_method" "$_id"
+    fi
+done
