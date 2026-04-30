@@ -21,6 +21,7 @@
           packages = with pkgs; [
             bash
             bats
+            cocogitto
             jq
             shellcheck
             kls

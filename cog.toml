@@ -1,0 +1,23 @@
+[commit_types]
+  [commit_types.feat]
+  changelog_title = "Features"
+  [commit_types.fix]
+  changelog_title = "Bug Fixes"
+  [commit_types.refactor]
+  changelog_title = "Refactoring"
+  [commit_types.test]
+  changelog_title = "Tests"
+  [commit_types.chore]
+  changelog_title = "Chores"
+  [commit_types.ci]
+  changelog_title = "CI"
+  [commit_types.docs]
+  changelog_title = "Documentation"
+
+[changelog]
+  path = "CHANGELOG.md"
+  template = "remote_commits"
+  remote = "github.com"
+  repository = "lsts"
+  owner = "anakin4747"
+  authors = []
