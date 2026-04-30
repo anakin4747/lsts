@@ -228,3 +228,26 @@ EOF
     [[ "$status" -ne 0 ]]
     [[ "$output" == *"fixture file not found"* ]]
 }
+
+# ---------------------------------------------------------------------------
+# lsts_initialize_capability
+# ---------------------------------------------------------------------------
+
+@test "lsts_initialize_capability passes when capability matches" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
+    _start_fake_ls
+    lsts_initialize_capability 'hoverProvider == true'
+}
+
+@test "lsts_initialize_capability fails when capability is absent" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{}}'
+    _start_fake_ls
+    run lsts_initialize_capability 'hoverProvider == true'
+    [[ "$status" -ne 0 ]]
+}
+
+@test "lsts_initialize_capability passes for a non-boolean capability" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"textDocumentSync":{"openClose":true,"change":1}}}'
+    _start_fake_ls
+    lsts_initialize_capability 'textDocumentSync.change == 1'
+}
