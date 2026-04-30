@@ -472,6 +472,25 @@ _lsts_recv_notification() {
     return 1
 }
 
+# _lsts_wait_for_diagnostics <uri>
+# Read messages until a textDocument/publishDiagnostics notification for
+# <uri> is received, auto-replying to any server-to-client requests.
+# Aborts with an error after LSTS_TIMEOUT seconds.
+_lsts_wait_for_diagnostics() {
+    local uri="$1"
+    local _timeout="${LSTS_TIMEOUT:-10}"
+    local _deadline=$(( SECONDS + _timeout ))
+    while (( SECONDS < _deadline )); do
+        lsts_recv || return 1
+        _lsts_reply_to_request && continue
+        printf '%s' "$LSTS_RESPONSE" | jq -e \
+            --arg m "textDocument/publishDiagnostics" --arg uri "$uri" \
+            '.method == $m and .params.uri == $uri' >/dev/null 2>&1 && return 0
+    done
+    echo "_lsts_wait_for_diagnostics: timed out after ${_timeout}s waiting for publishDiagnostics" >&2
+    return 1
+}
+
 # lsts_diagnostics <path> [fixture-path]
 # Initialize, open a document, and wait for the server's
 # textDocument/publishDiagnostics notification for that file.
@@ -483,17 +502,7 @@ lsts_diagnostics() {
 
     lsts_initialize
     lsts_open "$path"
-
-    # Consume messages until we get publishDiagnostics for our file.
-    local _timeout="${LSTS_TIMEOUT:-10}"
-    local _deadline=$(( SECONDS + _timeout ))
-    while (( SECONDS < _deadline )); do
-        lsts_recv || return 1
-        _lsts_reply_to_request && continue
-        printf '%s' "$LSTS_RESPONSE" | jq -e \
-            --arg m "textDocument/publishDiagnostics" --arg uri "$uri" \
-            '.method == $m and .params.uri == $uri' >/dev/null 2>&1 && break
-    done
+    _lsts_wait_for_diagnostics "$uri" || return 1
 
     # Require at least one diagnostic — an empty array means no errors were
     # reported, which indicates the file under test has no syntax errors.
@@ -504,4 +513,17 @@ lsts_diagnostics() {
     }
 
     _lsts_fixture_or_print "$fixture"
+}
+
+# lsts_initialize_capability <jq-expr>
+# Initialize and assert that the server's capabilities satisfy <jq-expr>.
+# The expression is prepended with '.' and evaluated against
+# .result.capabilities.
+#
+#   lsts_initialize_capability 'hoverProvider == true'
+#   lsts_initialize_capability 'textDocumentSync.change == 1'
+lsts_initialize_capability() {
+    local expr="$1"
+    lsts_initialize
+    echo "$LSTS_RESPONSE" | jq -e ".result.capabilities | .${expr}" > /dev/null
 }
