@@ -1,19 +1,36 @@
 #!/usr/bin/env bash
 # fake-ls — a scriptable fake LSP server for testing lsts.
 #
-# Reads LSP messages from stdin and dispatches to a handler function defined
-# in $FAKE_LS_SCRIPT. The script must define:
+# Two ways to configure behaviour:
 #
-#   fake_ls_handle <method> <id-or-empty> <params-json>
+# 1. Environment variables (simple cases):
 #
-# The handler should call one of:
-#   fake_ls_respond <json>       — send a JSON-RPC response with the current id
-#   fake_ls_notify <method> <params>  — send a server-initiated notification
-#   fake_ls_request <method> <params> — send a server-to-client request and
-#                                       consume the client reply
+#    FAKE_LS_RESPOND_<method>  — JSON result to send as the response when
+#                                <method> is received (/ replaced by _).
+#                                If unset, responds with {"result":null}.
 #
-# If fake_ls_handle is not defined, a default handler is used that responds
-# to every request with {"result":null} and ignores notifications.
+#    FAKE_LS_NOTIFY_<method>   — Full notification JSON to send *before*
+#                                responding to <method>. Use this to push
+#                                server-initiated notifications such as
+#                                textDocument/publishDiagnostics.
+#
+#    Example:
+#      export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
+#      export FAKE_LS_NOTIFY_textDocument_didOpen='{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{...}}'
+#
+# 2. Script (complex cases):
+#
+#    FAKE_LS_SCRIPT — path to a bash file that defines fake_ls_handle:
+#
+#      fake_ls_handle <method> <id-or-empty> <params-json>
+#
+#    Inside fake_ls_handle use:
+#      fake_ls_respond <result-json>        — send a JSON-RPC response
+#      fake_ls_notify <method> <params>     — send a server notification
+#      fake_ls_request <method> <params>    — send a server-to-client request
+#
+#    FAKE_LS_SCRIPT takes precedence over env vars when fake_ls_handle is
+#    defined.
 
 set -o errexit
 set -o nounset
@@ -31,7 +48,6 @@ _lsp_send() {
 }
 
 _lsp_recv() {
-    # reads one message into FAKE_MSG; returns 1 on EOF
     local line content_length=0
     FAKE_MSG=""
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -43,7 +59,7 @@ _lsp_recv() {
     done
     [[ "$content_length" -eq 0 ]] && return 1
     # read -N counts bytes in LC_ALL=C; a short read means the client closed
-    # the connection mid-message — treat it as EOF.
+    # mid-message — treat it as EOF.
     IFS= read -r -N "$content_length" FAKE_MSG || return 1
 }
 
@@ -65,19 +81,40 @@ fake_ls_request() {
     local method="$1" params="$2"
     local id=$(( _req_counter++ ))
     _lsp_send "{\"jsonrpc\":\"2.0\",\"id\":${id},\"method\":\"${method}\",\"params\":${params}}"
-    # consume client reply; ignore failure — the client may not reply to all
-    # server-to-client requests in every test scenario.
+    # consume client reply; ignore failure — the client may not always reply.
     _lsp_recv || true
 }
 
-_default_handle() {
+# Convert a method name to an env var suffix (replace / with _).
+_method_var() {
+    printf '%s' "${1//\//_}"
+}
+
+_env_handle() {
     local method="$1" id="$2"
-    # Only respond to requests (those with an id)
-    [[ -n "$id" ]] && fake_ls_respond "null"
+    local suffix
+    suffix="$(_method_var "$method")"
+
+    # Send a notification before responding if configured.
+    local notify_var="FAKE_LS_NOTIFY_${suffix}"
+    if [[ -n "${!notify_var:-}" ]]; then
+        _lsp_send "${!notify_var}"
+    fi
+
+    # Respond to requests (messages with an id).
+    if [[ -n "$id" ]]; then
+        local respond_var="FAKE_LS_RESPOND_${suffix}"
+        if [[ -n "${!respond_var:-}" ]]; then
+            fake_ls_respond "${!respond_var}"
+        else
+            fake_ls_respond "null"
+        fi
+    fi
 }
 
 [[ -n "${FAKE_LS_SCRIPT:-}" ]] && source "$FAKE_LS_SCRIPT"
 
+FAKE_MSG=""
 while _lsp_recv; do
     _method="$(printf '%s' "$FAKE_MSG" | jq -r '.method // empty')"
     _id="$(printf '%s' "$FAKE_MSG" | jq -r '.id // empty')"
@@ -87,6 +124,6 @@ while _lsp_recv; do
     if declare -f fake_ls_handle > /dev/null 2>&1; then
         fake_ls_handle "$_method" "$_id" "$_params" || true
     else
-        _default_handle "$_method" "$_id"
+        _env_handle "$_method" "$_id"
     fi
 done
