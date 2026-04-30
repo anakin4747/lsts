@@ -43,6 +43,10 @@ teardown() {
     if [[ -n "$_script" ]]; then rm -f "$_script"; fi
 }
 
+teardown_file() {
+    lsts_check_no_snapshots
+}
+
 # ---------------------------------------------------------------------------
 # lsts_recv: framing
 # ---------------------------------------------------------------------------
@@ -192,4 +196,35 @@ EOF
     lsts_set_root "/tmp"
     LSTS_LANG_ID="" run lsts_start
     [[ "$status" -ne 0 ]]
+}
+
+# ---------------------------------------------------------------------------
+# Snapshot detection
+# ---------------------------------------------------------------------------
+
+@test "lsts_check_no_snapshots passes when no snapshots were taken" {
+    lsts_check_no_snapshots
+}
+
+@test "lsts_check_no_snapshots fails when a snapshot was taken" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
+    _start_fake_ls
+    # call lsts_hover with no fixture — snapshot mode
+    lsts_hover "lsts_tests.bats:1:1"
+    run lsts_check_no_snapshots
+    [[ "$status" -ne 0 ]]
+}
+
+# ---------------------------------------------------------------------------
+# Fixture file validation
+# ---------------------------------------------------------------------------
+
+@test "lsts_hover fails with an error message when fixture file does not exist" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
+    _start_fake_ls
+    run lsts_hover "lsts_tests.bats:1:1" "/nonexistent/fixture.rpc.json"
+    [[ "$status" -ne 0 ]]
+    [[ "$output" == *"fixture file not found"* ]]
 }
