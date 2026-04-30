@@ -207,16 +207,34 @@ _lsts_normalize() {
 
 # _lsts_fixture_or_print [fixture-path]
 # Normalize LSTS_RESPONSE, then diff against fixture-path or print it (snapshot
-# mode) if omitted.
+# mode) if omitted. In snapshot mode, records that a snapshot was taken so
+# lsts_check_no_snapshots can detect it.
 _lsts_fixture_or_print() {
     local fixture="${1:-}"
     _lsts_normalize
     if [[ -z "$fixture" ]]; then
         printf "\e[01;33m WARNING\e[0m previous test in snapshot mode\n" >&3
         echo "$LSTS_RESPONSE"
+        touch "${BATS_TMPDIR:-/tmp}/lsts_snapshot_taken"
         return
     fi
+    if [[ -n "$fixture" ]] && [[ ! -f "$fixture" ]]; then
+        echo "lsts: fixture file not found: $fixture" >&2
+        return 1
+    fi
     diff <(echo "$LSTS_RESPONSE") "$fixture"
+}
+
+# lsts_check_no_snapshots
+# Fails if any lsts helper was called in snapshot mode (i.e. without a fixture
+# argument) during this test run. Call this in teardown_file to ensure no
+# accidental snapshots go unnoticed.
+lsts_check_no_snapshots() {
+    if [[ -f "${BATS_TMPDIR:-/tmp}/lsts_snapshot_taken" ]]; then
+        echo "lsts_check_no_snapshots: one or more tests ran in snapshot mode" >&2
+        rm -f "${BATS_TMPDIR:-/tmp}/lsts_snapshot_taken"
+        return 1
+    fi
 }
 
 # _lsts_doc_request <method> <path> <params-json> [fixture-path]
