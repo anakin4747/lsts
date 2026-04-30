@@ -6,6 +6,30 @@ on:
   pull_request:
 
 jobs:
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install cocogitto
+        run: |
+          URL=$(curl -fsSL https://api.github.com/repos/cocogitto/cocogitto/releases/latest \
+            | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl")) | .browser_download_url')
+          curl -fsSL "$URL" | tar -xz --strip-components=1 -C /usr/local/bin
+
+      - name: Check conventional commits (pull request)
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE=${{ github.event.pull_request.base.sha }}
+          HEAD=${{ github.event.pull_request.head.sha }}
+          cog check "$BASE..$HEAD"
+
+      - name: Check conventional commits (push)
+        if: github.event_name == 'push'
+        run: cog check "${{ github.event.before }}..${{ github.event.after }}"
+
   test:
     runs-on: ubuntu-latest
     steps:
