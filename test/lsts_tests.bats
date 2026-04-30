@@ -270,3 +270,30 @@ EOF
     run lsts_diagnostics_none "lsts_tests.bats"
     [[ "$status" -ne 0 ]]
 }
+
+# ---------------------------------------------------------------------------
+# lsts_change
+# ---------------------------------------------------------------------------
+
+@test "lsts_change sends didChange and receives updated publishDiagnostics" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"textDocumentSync":{"openClose":true,"change":1}}}'
+    export FAKE_LS_NOTIFY_textDocument_didOpen="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[{\"severity\":1,\"message\":\"original\",\"range\":{\"start\":{\"line\":0,\"character\":0},\"end\":{\"line\":0,\"character\":1}}}]}}"
+    export FAKE_LS_NOTIFY_textDocument_didChange="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[{\"severity\":1,\"message\":\"updated\",\"range\":{\"start\":{\"line\":0,\"character\":0},\"end\":{\"line\":0,\"character\":1}}}]}}"
+    _start_fake_ls
+    lsts_initialize
+    lsts_open "lsts_tests.bats"
+    _lsts_recv_notification "textDocument/publishDiagnostics"
+    lsts_change "lsts_tests.bats" 2 "lsts_tests.bats" \
+        "$FIXTURES_DIR/diag_after_change.rpc.json"
+}
+
+@test "lsts_change does not trigger snapshot mode when called without a fixture" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"textDocumentSync":{"openClose":true,"change":1}}}'
+    export FAKE_LS_NOTIFY_textDocument_didOpen="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[]}}"
+    export FAKE_LS_NOTIFY_textDocument_didChange="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[]}}"
+    _start_fake_ls
+    lsts_initialize
+    lsts_open "lsts_tests.bats"
+    _lsts_recv_notification "textDocument/publishDiagnostics"
+    lsts_change "lsts_tests.bats" 2 "lsts_tests.bats"
+}
