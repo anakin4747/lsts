@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cocogitto
+        run: |
+          URL=$(curl -fsSL https://api.github.com/repos/cocogitto/cocogitto/releases/latest \
+            | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl")) | .browser_download_url')
+          curl -fsSL "$URL" | tar -xz --strip-components=1 -C /usr/local/bin
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and generate changelog
+        id: bump
+        run: |
+          cog bump --auto 2>&1 | tee /tmp/cog-output.txt || true
+          if grep -q "Nothing to bump" /tmp/cog-output.txt; then
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+            echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push tag and changelog
+        if: steps.bump.outputs.bumped == 'true'
+        run: git push --follow-tags
+
+      - name: Create GitHub release
+        if: steps.bump.outputs.bumped == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.bump.outputs.version }}"
+          # Extract this version's section from CHANGELOG.md
+          NOTES=$(awk "/^## $VERSION/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes "$NOTES"
