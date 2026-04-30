@@ -527,3 +527,26 @@ lsts_initialize_capability() {
     lsts_initialize
     echo "$LSTS_RESPONSE" | jq -e ".result.capabilities | .${expr}" > /dev/null
 }
+
+# lsts_diagnostics_none <path> [fixture-path]
+# Initialize, open a document, and wait for the server's publishDiagnostics
+# notification. Fails if the notification contains any diagnostics.
+# Use for documents expected to have no errors.
+lsts_diagnostics_none() {
+    local path="$1" fixture="${2:-}"
+    local uri="file://$LSTS_ROOT/$path"
+
+    lsts_initialize
+    lsts_open "$path"
+    _lsts_wait_for_diagnostics "$uri" || return 1
+
+    printf '%s' "$LSTS_RESPONSE" | \
+        jq -e '.params.diagnostics | length == 0' >/dev/null 2>&1 || {
+        echo "lsts_diagnostics_none: server reported diagnostics for $path" >&2
+        return 1
+    }
+
+    if [[ -n "$fixture" ]]; then
+        _lsts_fixture_or_print "$fixture"
+    fi
+}

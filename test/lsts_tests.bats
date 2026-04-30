@@ -251,3 +251,22 @@ EOF
     _start_fake_ls
     lsts_initialize_capability 'textDocumentSync.change == 1'
 }
+
+# ---------------------------------------------------------------------------
+# lsts_diagnostics_none
+# ---------------------------------------------------------------------------
+
+@test "lsts_diagnostics_none passes when server reports no diagnostics" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"textDocumentSync":{"openClose":true,"change":1}}}'
+    export FAKE_LS_NOTIFY_textDocument_didOpen="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[]}}"
+    _start_fake_ls
+    lsts_diagnostics_none "lsts_tests.bats"
+}
+
+@test "lsts_diagnostics_none fails when server reports diagnostics" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{"textDocumentSync":{"openClose":true,"change":1}}}'
+    export FAKE_LS_NOTIFY_textDocument_didOpen="{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/publishDiagnostics\",\"params\":{\"uri\":\"file://$LSTS_ROOT/lsts_tests.bats\",\"diagnostics\":[{\"severity\":1,\"message\":\"err\",\"range\":{\"start\":{\"line\":0,\"character\":0},\"end\":{\"line\":0,\"character\":1}}}]}}"
+    _start_fake_ls
+    run lsts_diagnostics_none "lsts_tests.bats"
+    [[ "$status" -ne 0 ]]
+}
