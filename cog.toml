@@ -11,6 +11,8 @@
   changelog_title = "Chores"
   [commit_types.ci]
   changelog_title = "CI"
+  [commit_types.cd]
+  changelog_title = "CD"
   [commit_types.docs]
   changelog_title = "Documentation"
 
