@@ -26,7 +26,27 @@ arguments to methods.
 Commit every logical atomic addition or change using git. Each commit should
 represent one coherent unit of work (e.g. add a helper function, fix a bug,
 update the flake). Do not batch unrelated changes into a single commit. Commit
-messages should be concise and written in the imperative mood.
+messages MUST follow the [Conventional Commits](https://www.conventionalcommits.org/)
+spec — CI will reject commits that don't. Allowed types are defined in
+`cog.toml`.
+
+## CI
+
+After pushing a branch or opening a PR, ALWAYS check that CI passes before
+considering the work done. Use `gh run list --repo anakin4747/lsts` to see the
+latest run status, and `gh run view <id> --log-failed` to see failure details.
+Do not move on to the next task until CI is green. If CI fails, diagnose the
+root cause and fix it. If the failure was introduced by the immediately
+preceding commit and that commit has not yet been pushed to a remote, amend it.
+Otherwise create a new `fix:` commit.
+
+## Amending commits
+
+If a review comment or CI failure reveals a mistake in the immediately
+preceding commit, **amend that commit** rather than adding a new one — provided
+the commit has not yet been pushed, or you are the sole author and a force-push
+is acceptable. Only create a new commit if the original commit is already part
+of shared history that others may have based work on.
 
 ## Code review
 
@@ -45,4 +65,5 @@ see how the code can be made cleaner:
 - Did you add anything extra functionality that doesn't have a corresponding
   test?
 
-Fix the code accordingly in new commits.
+If fixes are needed and the commit has not yet been pushed, amend it.
+Otherwise create a new fix commit.
