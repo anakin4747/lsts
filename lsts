@@ -210,6 +210,10 @@ _lsts_fixture_or_print() {
     local fixture="${1:-}"
     _lsts_normalize
     if [[ -z "$fixture" ]]; then
+        if [[ -n "${LSTS_FORBID_SNAPSHOT:-}" ]]; then
+            printf "\e[31;1m SNAPSHOT_ERROR\e[0m no fixture provided — snapshot mode is forbidden (LSTS_FORBID_SNAPSHOT is set)\n" >&3
+            return 1
+        fi
         printf "\e[01;33m WARNING\e[0m previous test in snapshot mode\n" >&3
         echo "$LSTS_RESPONSE"
         return
