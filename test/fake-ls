@@ -112,6 +112,7 @@ _env_handle() {
     fi
 }
 
+# shellcheck source=/dev/null
 [[ -n "${FAKE_LS_SCRIPT:-}" ]] && source "$FAKE_LS_SCRIPT"
 
 FAKE_MSG=""
