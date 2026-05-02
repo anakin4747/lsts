@@ -29,13 +29,19 @@ jobs:
 
       - name: Bump version and generate changelog
         id: bump
+        # Only consider commits since cocogitto was introduced (b3a95a3).
+        # Earlier commits predate the conventional commit convention and would
+        # cause cog to error out.
         run: |
-          cog bump --auto 2>&1 | tee /tmp/cog-output.txt || true
-          if grep -q "Nothing to bump" /tmp/cog-output.txt; then
-            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          if cog bump --auto --from b3a95a3 2>&1 | tee /tmp/cog-output.txt; then
+            if grep -q "Nothing to bump" /tmp/cog-output.txt; then
+              echo "bumped=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "bumped=true" >> "$GITHUB_OUTPUT"
+              echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+            fi
           else
-            echo "bumped=true" >> "$GITHUB_OUTPUT"
-            echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Push tag and changelog
