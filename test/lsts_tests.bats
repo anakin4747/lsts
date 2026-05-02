@@ -3,11 +3,14 @@
 #
 # Uses fake-ls, a scriptable fake LSP server, so no real language server is
 # required. Each test exercises lsts behaviour directly and in isolation.
+#
+# shellcheck disable=SC2030,SC2031
 
 LSTS_LIB="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/lsts"
 FAKE_LS="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)/fake-ls"
 FIXTURES_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)/fake-ls-fixtures"
 
+# shellcheck source=/dev/null
 source "$LSTS_LIB"
 
 lsts_set_root "$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)"
@@ -119,6 +122,7 @@ EOF
     export FAKE_LS_RESPOND_initialize='{"capabilities":{"definitionProvider":true}}'
     export FAKE_LS_RESPOND_textDocument_definition='[{"uri":"file:///nix/store/abc123-go-1.22/share/go/src/fmt/print.go"}]'
     _start_fake_ls
+    # shellcheck disable=SC2016
     lsts_add_filter \
         "file:///nix/store/[a-z0-9]*-go-[0-9.]*/share/go" \
         'file://$GOROOT'
