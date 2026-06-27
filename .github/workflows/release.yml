@@ -16,11 +16,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install cocogitto
-        run: |
-          URL=$(curl -fsSL https://api.github.com/repos/cocogitto/cocogitto/releases/latest \
-            | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl")) | .browser_download_url')
-          curl -fsSL "$URL" | tar -xz --strip-components=1 -C /usr/local/bin
+      - uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
@@ -30,14 +28,16 @@ jobs:
       - name: Bump version and generate changelog
         id: bump
         run: |
-          set -o pipefail
-          cog bump --auto 2>&1 | tee /tmp/cog-output.txt
-          if grep -q "Nothing to bump" /tmp/cog-output.txt; then
-            echo "bumped=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "bumped=true" >> "$GITHUB_OUTPUT"
-            echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
-          fi
+          nix develop --command bash -c '
+            set -o pipefail
+            cog bump --auto 2>&1 | tee /tmp/cog-output.txt
+            if grep -q "Nothing to bump" /tmp/cog-output.txt; then
+              echo "bumped=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "bumped=true" >> "$GITHUB_OUTPUT"
+              echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+            fi
+          '
 
       - name: Push tag and changelog
         if: steps.bump.outputs.bumped == 'true'
