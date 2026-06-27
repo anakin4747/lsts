@@ -8,7 +8,7 @@
 
 LSTS_LIB="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/lsts"
 FAKE_LS="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)/fake-ls"
-FIXTURES_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)/fake-ls-fixtures"
+FIXTURES_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)/fixtures"
 
 # shellcheck source=/dev/null
 source "$LSTS_LIB"
