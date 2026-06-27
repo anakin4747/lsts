@@ -1,3 +1,5 @@
+tag_prefix = "v"
+
 [commit_types]
   [commit_types.feat]
   changelog_title = "Features"
