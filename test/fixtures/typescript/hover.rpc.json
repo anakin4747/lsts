@@ -1,1 +1,0 @@
-{"jsonrpc":"2.0","id":2,"result":{"contents":{"kind":"markdown","value":"\n```typescript\nfunction greet(name: string): string\n```\n"},"range":{"start":{"line":0,"character":9},"end":{"line":0,"character":14}}}}

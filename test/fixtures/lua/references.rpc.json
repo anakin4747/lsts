@@ -1,1 +1,0 @@
-{"id":2,"jsonrpc":"2.0","result":[{"range":{"end":{"character":11,"line":0},"start":{"character":6,"line":0}},"uri":"file://$LSTS_ROOT/main.lua"},{"range":{"end":{"character":20,"line":1},"start":{"character":15,"line":1}},"uri":"file://$LSTS_ROOT/main.lua"}]}
