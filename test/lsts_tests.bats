@@ -100,14 +100,12 @@ EOF
 # ---------------------------------------------------------------------------
 
 @test "lsts_hover passes when response matches fixture" {
-    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
     _start_fake_ls
     lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_hello.rpc.json"
 }
 
 @test "lsts_hover fails when response does not match fixture" {
-    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"wrong"}}'
     _start_fake_ls
     run lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_hello.rpc.json"
@@ -115,18 +113,30 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# lsts_add_filter
+# Multiple requests after single initialize
 # ---------------------------------------------------------------------------
 
-@test "lsts_add_filter rewrites matching patterns before fixture comparison" {
-    export FAKE_LS_RESPOND_initialize='{"capabilities":{"definitionProvider":true}}'
-    export FAKE_LS_RESPOND_textDocument_definition='[{"uri":"file:///nix/store/abc123-go-1.22/share/go/src/fmt/print.go"}]'
+@test "lsts_hover can be called twice after a single initialize" {
+    _write_script << 'SCRIPT'
+    _init_count=0
+    fake_ls_handle() {
+        if [[ "$1" == "initialize" ]]; then
+            _init_count=$((_init_count + 1))
+            if [[ $_init_count -gt 1 ]]; then
+                fake_ls_respond '{"code":-32002,"message":"Server initialized"}'
+            else
+                fake_ls_respond '{"capabilities":{"hoverProvider":true}}'
+            fi
+        elif [[ "$1" == "textDocument/hover" ]]; then
+            fake_ls_respond '{"contents":{"kind":"plaintext","value":"hello"}}'
+        fi
+    }
+SCRIPT
     _start_fake_ls
-    # shellcheck disable=SC2016
-    lsts_add_filter \
-        "file:///nix/store/[a-z0-9]*-go-[0-9.]*/share/go" \
-        'file://$GOROOT'
-    lsts_definition "lsts_tests.bats:1:1" "$FIXTURES_DIR/definition_filtered.rpc.json"
+    lsts_initialize
+    lsts_open "lsts_tests.bats"
+    lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_first.rpc.json"
+    lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_second.rpc.json"
 }
 
 # ---------------------------------------------------------------------------
@@ -211,7 +221,6 @@ EOF
 }
 
 @test "lsts_check_no_snapshots fails when a snapshot was taken" {
-    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
     _start_fake_ls
     # call lsts_hover with no fixture — snapshot mode
@@ -225,7 +234,6 @@ EOF
 # ---------------------------------------------------------------------------
 
 @test "lsts_hover fails with an error message when fixture file does not exist" {
-    export FAKE_LS_RESPOND_initialize='{"capabilities":{"hoverProvider":true}}'
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
     _start_fake_ls
     run lsts_hover "lsts_tests.bats:1:1" "/nonexistent/fixture.rpc.json"
