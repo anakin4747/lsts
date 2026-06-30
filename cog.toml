@@ -20,7 +20,7 @@ tag_prefix = "v"
 
 [changelog]
   path = "CHANGELOG.md"
-  template = "remote_commits"
+  template = "remote"
   remote = "github.com"
   repository = "lsts"
   owner = "anakin4747"
