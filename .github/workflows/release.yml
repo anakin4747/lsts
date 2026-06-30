@@ -27,20 +27,7 @@ jobs:
 
       - name: Bump version and generate changelog
         id: bump
-        run: |
-          nix develop --command bash -c '
-            set -o pipefail
-            if cog bump --auto 2>&1 | tee /tmp/cog-output.txt; then
-              echo "bumped=true" >> "$GITHUB_OUTPUT"
-              echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
-            else
-              if grep -q "Nothing to bump" /tmp/cog-output.txt; then
-                echo "bumped=false" >> "$GITHUB_OUTPUT"
-              else
-                exit 1
-              fi
-            fi
-          '
+        run: nix develop --command ./scripts/cog-bump-release
 
       - name: Push tag and changelog
         if: steps.bump.outputs.bumped == 'true'
