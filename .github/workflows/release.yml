@@ -31,14 +31,14 @@ jobs:
           nix develop --command bash -c '
             set -o pipefail
             if cog bump --auto 2>&1 | tee /tmp/cog-output.txt; then
+              echo "bumped=true" >> "$GITHUB_OUTPUT"
+              echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+            else
               if grep -q "Nothing to bump" /tmp/cog-output.txt; then
                 echo "bumped=false" >> "$GITHUB_OUTPUT"
               else
-                echo "bumped=true" >> "$GITHUB_OUTPUT"
-                echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+                exit 1
               fi
-            else
-              echo "bumped=false" >> "$GITHUB_OUTPUT"
             fi
           '
 
