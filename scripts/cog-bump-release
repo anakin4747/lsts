@@ -3,15 +3,18 @@
 # Runs cog bump --auto, captures the result, and writes bumped/version to
 # $GITHUB_OUTPUT. Exits 1 on unexpected errors so the workflow fails red.
 
-set -o pipefail
+die() {
+    printf "\033[31merror: %s\033[0m\n" "$1" >&2
+    exit 1
+}
 
-if cog bump --auto 2>&1 | tee /tmp/cog-bump-output.txt; then
-    echo "bumped=true" >> "$GITHUB_OUTPUT"
-    echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+cog bump --auto 2>&1 | tee /tmp/cog-bump-output.txt
+
+if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+    printf "bumped=true\n" >> "$GITHUB_OUTPUT"
+    printf "version=%s\n" "$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+elif grep --quiet "Nothing to bump" /tmp/cog-bump-output.txt; then
+    printf "bumped=false\n" >> "$GITHUB_OUTPUT"
 else
-    if grep -q "Nothing to bump" /tmp/cog-bump-output.txt; then
-        echo "bumped=false" >> "$GITHUB_OUTPUT"
-    else
-        exit 1
-    fi
+    die "cog bump failed"
 fi
