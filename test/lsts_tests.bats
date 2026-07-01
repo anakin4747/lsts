@@ -345,6 +345,7 @@ Body text"
 # ---------------------------------------------------------------------------
 
 @test "lsts_hover passes with dedented multiline inline string" {
+    # shellcheck disable=SC2016
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"markdown","value":"Returns the sum of two numbers.\n\n# Arguments\n* `a` - first number\n* `b` - second number"}}'
     _start_fake_ls
     lsts_hover "lsts_tests.bats:1:1" "
