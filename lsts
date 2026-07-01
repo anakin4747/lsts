@@ -255,10 +255,52 @@ _lsts_pos_request() {
         "$fixture"
 }
 
-# lsts_hover <path:line:col> [fixture-path]
+# _lsts_hover_value
+# Extract the human-readable text from a hover response's result.contents.
+# Handles MarkupContent (kind+value), MarkedString (language+value), plain
+# strings, and MarkedString[] arrays. Normalizes the response beforehand.
+_lsts_hover_value() {
+    _lsts_normalize
+    printf '%s' "$LSTS_RESPONSE" | jq -r '
+        .result.contents |
+        if type == "object" and has("value") then
+            .value
+        elif type == "string" then
+            .
+        elif type == "array" then
+            [.[] | if type == "object" and has("value") then .value else . end] | join("\n---\n")
+        else
+            empty
+        end
+    '
+}
+
+# lsts_hover <path:line:col> [fixture-path|inline-string]
 # Accepts 1-based line and column.
+# When the second argument is a file that exists, it's compared as a fixture
+# (full JSON-RPC response). When it's a non-empty string that is not a file,
+# it's treated as the expected hover display text, extracted from
+# result.contents via _lsts_hover_value.
 lsts_hover() {
-    _lsts_pos_request "textDocument/hover" "$1" "${2:-}"
+    local input="$1" expected="${2:-}"
+    local path line character uri
+    _lsts_parse_pos "$input" path line character
+    uri="file://$LSTS_ROOT/$path"
+
+    if [[ -f "$expected" ]]; then
+        _lsts_pos_request "textDocument/hover" "$input" "$expected"
+        return
+    fi
+
+    lsts_request "textDocument/hover" \
+        "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
+    lsts_recv_response || return 1
+
+    if [[ -z "$expected" ]]; then
+        _lsts_fixture_or_print
+    else
+        diff <(printf '%s' "$(_lsts_hover_value)") <(printf '%s' "$expected")
+    fi
 }
 
 # lsts_definition <path:line:col> [fixture-path]

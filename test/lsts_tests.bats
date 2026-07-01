@@ -233,12 +233,11 @@ EOF
 # Fixture file validation
 # ---------------------------------------------------------------------------
 
-@test "lsts_hover fails with an error message when fixture file does not exist" {
+@test "lsts_hover fails when fixture path does not exist and is treated as inline string" {
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
     _start_fake_ls
     run lsts_hover "lsts_tests.bats:1:1" "/nonexistent/fixture.rpc.json"
     [[ "$status" -ne 0 ]]
-    [[ "$output" == *"fixture file not found"* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -308,4 +307,35 @@ EOF
     lsts_open "lsts_tests.bats"
     _lsts_recv_notification "textDocument/publishDiagnostics"
     lsts_change "lsts_tests.bats" 2 "lsts_tests.bats"
+}
+
+# ---------------------------------------------------------------------------
+# lsts_hover / inline string comparison
+# ---------------------------------------------------------------------------
+
+@test "lsts_hover passes when inline string matches plaintext hover" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
+    _start_fake_ls
+    lsts_hover "lsts_tests.bats:1:1" "hello"
+}
+
+@test "lsts_hover fails when inline string does not match" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
+    _start_fake_ls
+    run lsts_hover "lsts_tests.bats:1:1" "wrong"
+    [[ "$status" -ne 0 ]]
+}
+
+@test "lsts_hover passes with multiline inline string" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"markdown","value":"# Title\n\nBody text"}}'
+    _start_fake_ls
+    lsts_hover "lsts_tests.bats:1:1" "# Title
+
+Body text"
+}
+
+@test "lsts_hover passes when contents is a plain string" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":"just a string"}'
+    _start_fake_ls
+    lsts_hover "lsts_tests.bats:1:1" "just a string"
 }
