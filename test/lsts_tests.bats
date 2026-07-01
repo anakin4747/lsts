@@ -329,9 +329,10 @@ EOF
 @test "lsts_hover passes with multiline inline string" {
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"markdown","value":"# Title\n\nBody text"}}'
     _start_fake_ls
-    lsts_hover "lsts_tests.bats:1:1" "# Title
+    lsts_hover "lsts_tests.bats:1:1" "
+        # Title
 
-Body text"
+        Body text"
 }
 
 @test "lsts_hover passes when contents is a plain string" {
