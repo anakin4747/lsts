@@ -2,7 +2,8 @@ name: Release
 
 on:
   push:
-    branches: [master]
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -14,33 +15,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: cachix/install-nix-action@v30
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Build and test
+        run: make
 
-      - name: Bump version and generate changelog
-        id: bump
-        run: nix develop --command ./scripts/cog-bump-release
+      - name: Generate release notes
+        run: awk '/^## /{c++} c==1' CHANGELOG.md > _release_notes.md
 
-      - name: Push tag and changelog
-        if: steps.bump.outputs.bumped == 'true'
-        run: git push --follow-tags
-
-      - name: Create GitHub release
-        if: steps.bump.outputs.bumped == 'true'
+      - name: Create release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ steps.bump.outputs.version }}"
-          # Extract this version's section from CHANGELOG.md
-          NOTES=$(awk "/^## $VERSION/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)
-          gh release create "$VERSION" \
-            --title "$VERSION" \
-            --notes "$NOTES"
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file _release_notes.md
