@@ -255,38 +255,48 @@ _lsts_pos_request() {
         "$fixture"
 }
 
-# _lsts_dedent
-# Strip common leading whitespace from a multiline string, mimicking Python's
-# textwrap.dedent. Strips leading and trailing blank lines, finds the minimum
-# indentation across remaining non-blank lines, and removes that prefix from
-# every line. Empty lines within the body are preserved.
-_lsts_dedent() {
-    local input="$1" line min_indent="" indent
-    local -a lines=()
-
-    mapfile -t lines <<< "$input"
-
-    local n
-    while (( ${#lines[@]} > 0 )); do
-        n=${#lines[@]}
-        line="${lines[n-1]}"
+# _lsts_strip_trailing_blank_lines <array-name>
+# Remove trailing blank or whitespace-only lines from the given array,
+# modifying it in place.
+_lsts_strip_trailing_blank_lines() {
+    # shellcheck disable=SC2178
+    local -n _arr="$1"
+    local n line
+    while (( ${#_arr[@]} > 0 )); do
+        n=${#_arr[@]}
+        line="${_arr[n-1]}"
         if [[ -z "$line" || "$line" =~ ^[[:space:]]+$ ]]; then
-            lines=("${lines[@]:0:n-1}")
+            _arr=("${_arr[@]:0:n-1}")
         else
             break
         fi
     done
+}
 
-    while (( ${#lines[@]} > 0 )); do
-        line="${lines[0]}"
+# _lsts_strip_leading_blank_lines <array-name>
+# Remove leading blank lines from the given array, modifying it in place.
+_lsts_strip_leading_blank_lines() {
+    # shellcheck disable=SC2178
+    local -n _arr="$1"
+    local line
+    while (( ${#_arr[@]} > 0 )); do
+        line="${_arr[0]}"
         if [[ -z "$line" ]]; then
-            lines=("${lines[@]:1}")
+            _arr=("${_arr[@]:1}")
         else
             break
         fi
     done
+}
 
-    for line in "${lines[@]}"; do
+# _lsts_min_indent <array-name>
+# Print the minimum indentation (number of leading whitespace characters)
+# across non-blank lines in the given array.
+_lsts_min_indent() {
+    # shellcheck disable=SC2178
+    local -n _arr="$1"
+    local line min_indent="" indent
+    for line in "${_arr[@]}"; do
         [[ -z "$line" ]] && continue
         [[ "$line" =~ ^([[:space:]]*) ]]
         indent="${#BASH_REMATCH[1]}"
@@ -294,8 +304,28 @@ _lsts_dedent() {
             min_indent="$indent"
         fi
     done
+    echo "$min_indent"
+}
+
+# _lsts_dedent
+# Strip common leading whitespace from a multiline string, mimicking Python's
+# textwrap.dedent. Strips leading and trailing blank lines, finds the minimum
+# indentation across remaining non-blank lines, and removes that prefix from
+# every line. Empty lines within the body are preserved.
+_lsts_dedent() {
+    local input="$1"
+    local -a lines=()
+
+    mapfile -t lines <<< "$input"
+
+    _lsts_strip_trailing_blank_lines lines
+    _lsts_strip_leading_blank_lines lines
+
+    local min_indent
+    min_indent="$(_lsts_min_indent lines)"
 
     local result=()
+    local line
     for line in "${lines[@]}"; do
         if [[ -z "$line" ]]; then
             result+=("")
