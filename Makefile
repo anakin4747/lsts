@@ -4,7 +4,7 @@ all:
 
 .PHONY: verify
 verify:
-	@cog verify "$(shell git log -1 --pretty=%B)" &> /dev/null
+	@cog verify &> /dev/null
 
 .PHONY: lint
 lint:
