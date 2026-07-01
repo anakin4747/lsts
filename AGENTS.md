@@ -15,6 +15,17 @@ initialiazation request and then another request like hover.
 Help me come up with how to properly structure this as a bats library that can
 be reused in several language servers for rigorous end to end testing
 
+## Running tests
+
+The test environment is managed by a nix flake and a Makefile. The default make
+target runs the tests inside a nix environment which contains everything
+necessary to run the tests.
+
+To run the tests simply run:
+```sh
+make
+```
+
 ## The ./language-server-protocol folder
 
 This folder is the git repo for the offical language server protocol
