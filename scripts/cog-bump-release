@@ -8,7 +8,7 @@ die() {
     exit 1
 }
 
-cog bump --auto 2>&1 | tee /tmp/cog-bump-output.txt
+cog bump --auto --annotated 2>&1 | tee /tmp/cog-bump-output.txt
 
 if [ "${PIPESTATUS[0]}" -eq 0 ]; then
     printf "bumped=true\n" >> "$GITHUB_OUTPUT"
