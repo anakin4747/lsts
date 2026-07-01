@@ -339,3 +339,25 @@ Body text"
     _start_fake_ls
     lsts_hover "lsts_tests.bats:1:1" "just a string"
 }
+
+# ---------------------------------------------------------------------------
+# lsts_hover / inline string dedent
+# ---------------------------------------------------------------------------
+
+@test "lsts_hover passes with dedented multiline inline string" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"markdown","value":"Returns the sum of two numbers.\n\n# Arguments\n* `a` - first number\n* `b` - second number"}}'
+    _start_fake_ls
+    lsts_hover "lsts_tests.bats:1:1" "
+        Returns the sum of two numbers.
+
+        # Arguments
+        * \`a\` - first number
+        * \`b\` - second number
+    "
+}
+
+@test "lsts_hover passes with simple string unchanged after dedent" {
+    export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
+    _start_fake_ls
+    lsts_hover "lsts_tests.bats:1:1" "hello"
+}

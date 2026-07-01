@@ -255,6 +255,59 @@ _lsts_pos_request() {
         "$fixture"
 }
 
+# _lsts_dedent
+# Strip common leading whitespace from a multiline string, mimicking Python's
+# textwrap.dedent. Strips leading and trailing blank lines, finds the minimum
+# indentation across remaining non-blank lines, and removes that prefix from
+# every line. Empty lines within the body are preserved.
+_lsts_dedent() {
+    local input="$1" line min_indent="" indent
+    local -a lines=()
+
+    mapfile -t lines <<< "$input"
+
+    local n
+    while (( ${#lines[@]} > 0 )); do
+        n=${#lines[@]}
+        line="${lines[n-1]}"
+        if [[ -z "$line" || "$line" =~ ^[[:space:]]+$ ]]; then
+            lines=("${lines[@]:0:n-1}")
+        else
+            break
+        fi
+    done
+
+    while (( ${#lines[@]} > 0 )); do
+        line="${lines[0]}"
+        if [[ -z "$line" ]]; then
+            lines=("${lines[@]:1}")
+        else
+            break
+        fi
+    done
+
+    for line in "${lines[@]}"; do
+        [[ -z "$line" ]] && continue
+        [[ "$line" =~ ^([[:space:]]*) ]]
+        indent="${#BASH_REMATCH[1]}"
+        if [[ -z "$min_indent" ]] || (( indent < min_indent )); then
+            min_indent="$indent"
+        fi
+    done
+
+    local result=()
+    for line in "${lines[@]}"; do
+        if [[ -z "$line" ]]; then
+            result+=("")
+        else
+            result+=("${line:$min_indent}")
+        fi
+    done
+
+    local IFS=$'\n'
+    printf '%s' "${result[*]}"
+}
+
 # _lsts_hover_value
 # Extract the human-readable text from a hover response's result.contents.
 # Handles MarkupContent (kind+value), MarkedString (language+value), plain
@@ -299,7 +352,7 @@ lsts_hover() {
     if [[ -z "$expected" ]]; then
         _lsts_fixture_or_print
     else
-        diff <(printf '%s' "$(_lsts_hover_value)") <(printf '%s' "$expected")
+        diff <(printf '%s' "$(_lsts_hover_value)") <(printf '%s' "$(_lsts_dedent "$expected")")
     fi
 }
 
