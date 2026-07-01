@@ -13,3 +13,8 @@ lint:
 .PHONY: test
 test:
 	bats --formatter $(CURDIR)/lsts-format-pretty test/lsts_tests.bats
+
+.PHONY: release
+release:
+	nix develop --extra-experimental-features 'nix-command flakes' --command cog bump --auto
+	git push --follow-tags
