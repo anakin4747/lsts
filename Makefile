@@ -16,4 +16,6 @@ test:
 
 .PHONY: release
 release:
-	./scripts/release
+	nix develop \
+		--extra-experimental-features 'nix-command flakes' \
+		--command ./scripts/release
