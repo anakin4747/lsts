@@ -1,10 +1,10 @@
 .PHONY: all
 all:
-	nix develop --extra-experimental-features 'nix-command flakes' --command make test lint verify
+	nix develop --extra-experimental-features 'nix-command flakes' --command make test lint lint_commit
 
-.PHONY: verify
-verify:
-	@cog verify &> /dev/null
+.PHONY: lint_commit
+lint_commit:
+	cog check
 
 .PHONY: lint
 lint:
