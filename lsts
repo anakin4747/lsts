@@ -218,12 +218,13 @@ lsts_check_no_snapshots() {
 }
 
 # _lsts_doc_request <method> <path> <params-json> [fixture-path]
-# Internal helper: send a request with caller-supplied params, then
-# fixture-or-print. Requires lsts_initialize and lsts_open to have been
-# called first.
+# Internal helper: open the document, then send a request with caller-supplied
+# params, then fixture-or-print. Requires lsts_initialize to have been called
+# first.
 _lsts_doc_request() {
     local method="$1" path="$2" params="$3" fixture="${4:-}"
 
+    lsts_open "$path"
     lsts_request "$method" "$params"
     lsts_recv_response
 
@@ -375,6 +376,7 @@ lsts_hover() {
         return
     fi
 
+    lsts_open "$path"
     lsts_request "textDocument/hover" \
         "{\"textDocument\":{\"uri\":\"${uri}\"},\"position\":{\"line\":${line},\"character\":${character}}}"
     lsts_recv_response || return 1

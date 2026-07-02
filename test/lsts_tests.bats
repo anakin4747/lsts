@@ -99,6 +99,31 @@ EOF
 # lsts_hover / fixture comparison
 # ---------------------------------------------------------------------------
 
+@test "lsts_hover sends didOpen automatically" {
+    _write_script << 'SCRIPT'
+    _did_open=0
+    fake_ls_handle() {
+        local method="$1" id="$2"
+        if [[ "$method" == "initialize" ]]; then
+            fake_ls_respond '{"capabilities":{"hoverProvider":true}}'
+        elif [[ "$method" == "initialized" ]]; then
+            :
+        elif [[ "$method" == "textDocument/didOpen" ]]; then
+            _did_open=1
+        elif [[ "$method" == "textDocument/hover" ]]; then
+            if [[ $_did_open -eq 0 ]]; then
+                echo "ERROR: didOpen was not sent before hover" >&2
+                exit 1
+            fi
+            fake_ls_respond '{"contents":{"kind":"plaintext","value":"hello"}}'
+        fi
+    }
+SCRIPT
+    _start_fake_ls
+    lsts_initialize
+    lsts_hover "lsts_tests.bats:1:1" "hello"
+}
+
 @test "lsts_hover passes when response matches fixture" {
     export FAKE_LS_RESPOND_textDocument_hover='{"contents":{"kind":"plaintext","value":"hello"}}'
     _start_fake_ls
@@ -134,7 +159,6 @@ EOF
 SCRIPT
     _start_fake_ls
     lsts_initialize
-    lsts_open "lsts_tests.bats"
     lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_first.rpc.json"
     lsts_hover "lsts_tests.bats:1:1" "$FIXTURES_DIR/hover_second.rpc.json"
 }
