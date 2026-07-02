@@ -1,6 +1,8 @@
 .PHONY: all
 all:
-	nix develop --extra-experimental-features 'nix-command flakes' --command make test lint lint_commit
+	nix develop \
+		--extra-experimental-features 'nix-command flakes' \
+		--command make test lint lint_commit
 
 .PHONY: lint_commit
 lint_commit:
