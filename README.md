@@ -19,11 +19,22 @@ setup()    { lsts_start; }
 teardown() { lsts_stop; }
 
 @test "hover returns documentation" {
+    lsts_initialize
+    lsts_open "main.sh"
     lsts_hover "main.sh:3:5" "hover.rpc.json"
 }
-```
 
 Each `*.rpc.json` fixture contains the expected LSP response. Paths inside fixtures may use `$LSTS_ROOT` and standard environment variables; they are expanded at comparison time.
+
+When the second argument is not a file path, `lsts_hover` compares against the inline text extracted from `result.contents`:
+
+```bash
+@test "hover shows expected text" {
+    lsts_initialize
+    lsts_open "main.sh"
+    lsts_hover "main.sh:3:5" "expected hover text"
+}
+```
 
 ## Helpers
 
@@ -34,6 +45,7 @@ Each `*.rpc.json` fixture contains the expected LSP response. Paths inside fixtu
 | `lsts_set_langId <id>` | Language identifier (e.g. `go`, `shellscript`) |
 | `lsts_start` / `lsts_stop` | Start / stop the server process |
 | `lsts_initialize` | Send LSP `initialize` / `initialized` |
+| `lsts_open <file>` | Send `textDocument/didOpen` |
 | `lsts_hover <pos> <fixture>` | `textDocument/hover` |
 | `lsts_completion <pos> <fixture>` | `textDocument/completion` |
 | `lsts_definition <pos> <fixture>` | `textDocument/definition` |
