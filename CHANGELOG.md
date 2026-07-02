@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.1.1](https://github.com/anakin4747/lsts/compare/05fa5a579d885793851166b7f5dcd2098b530de8..v0.1.1) - 2026-07-02
+#### Bug Fixes
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) put lsts_open back into _lsts_doc_request and lsts_hover inline path - ([6d85ca7](https://github.com/anakin4747/lsts/commit/6d85ca743b62deab607b1fa4bb878a15826f2f4a)) - Anakin Childerhose
+#### Documentation
+- update usage examples to reflect automatic lsts_open - ([588b7b6](https://github.com/anakin4747/lsts/commit/588b7b60046871b751a578be440f4b57889a6a48)) - Anakin Childerhose
+- update README to reflect lsts_hover no longer does init and open - ([05fa5a5](https://github.com/anakin4747/lsts/commit/05fa5a579d885793851166b7f5dcd2098b530de8)) - Anakin Childerhose
+
+- - -
+
 ## [v0.1.0](https://github.com/anakin4747/lsts/compare/b89b8029916458def03b43ff6e620ecd9aa9a793..v0.1.0) - 2026-07-02
 #### CD
 - switch to tag-triggered release workflow - ([57753e6](https://github.com/anakin4747/lsts/commit/57753e6bf2b4330bb1fd19f78cd5492cc117f3b0)) - Anakin Childerhose
