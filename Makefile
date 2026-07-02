@@ -16,5 +16,4 @@ test:
 
 .PHONY: release
 release:
-	nix develop --extra-experimental-features 'nix-command flakes' --command cog bump --auto
-	git push --follow-tags
+	./scripts/release
