@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.2.0](https://github.com/anakin4747/lsts/compare/a57f5928c37cc8704dd7359c7650a5b0fb204f2c..v0.2.0) - 2026-07-02
+#### Features
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) switch from coprocess to named-pipe server daemon with auto-attach - ([55e9aae](https://github.com/anakin4747/lsts/commit/55e9aaec52aac337729a0d4bc3143530eceba1c3)) - Anakin Childerhose
+#### Refactoring
+- merge lint_commit into lint make target - ([005a542](https://github.com/anakin4747/lsts/commit/005a542425ceb7c0dd1089cb8a2e25a7c247163e)) - Anakin Childerhose
+- format default make target - ([12479c6](https://github.com/anakin4747/lsts/commit/12479c667a556e4ed1482a8de7eb06821349c0d0)) - Anakin Childerhose
+- make release target use nix itself - ([a57f592](https://github.com/anakin4747/lsts/commit/a57f5928c37cc8704dd7359c7650a5b0fb204f2c)) - Anakin Childerhose
+
+- - -
+
 ## [v0.1.1](https://github.com/anakin4747/lsts/compare/05fa5a579d885793851166b7f5dcd2098b530de8..v0.1.1) - 2026-07-02
 #### Bug Fixes
 - ![BREAKING](https://img.shields.io/badge/BREAKING-red) put lsts_open back into _lsts_doc_request and lsts_hover inline path - ([6d85ca7](https://github.com/anakin4747/lsts/commit/6d85ca743b62deab607b1fa4bb878a15826f2f4a)) - Anakin Childerhose
