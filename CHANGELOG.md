@@ -1,0 +1,162 @@
+# Changelog
+All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
+
+- - -
+## [v0.1.0](https://github.com/anakin4747/lsts/compare/b89b8029916458def03b43ff6e620ecd9aa9a793..v0.1.0) - 2026-07-02
+#### CD
+- switch to tag-triggered release workflow - ([57753e6](https://github.com/anakin4747/lsts/commit/57753e6bf2b4330bb1fd19f78cd5492cc117f3b0)) - Anakin Childerhose
+- add release make target - ([555fbf0](https://github.com/anakin4747/lsts/commit/555fbf0b7872a5c3ef9b3a91854583488e5c63d8)) - Anakin Childerhose
+- create annotated tags for release workflow - ([d442b24](https://github.com/anakin4747/lsts/commit/d442b24d61471c6d780bfb93be64dbd1b1d9ceb7)) - Anakin Childerhose
+- replace manual cocogitto download with nix in release workflow - ([4dad207](https://github.com/anakin4747/lsts/commit/4dad2070caa183715d95cccb21cf3b79008145a8)) - Anakin Childerhose
+- fix pipefail bug and drop invalid --from flag from cog bump - ([a7ad12e](https://github.com/anakin4747/lsts/commit/a7ad12ebdae496df6fbdc8616737f5f22b49c15e)) - Anakin Childerhose
+- limit cog bump to commits since conventional commits were adopted - ([ff5279f](https://github.com/anakin4747/lsts/commit/ff5279f4d3ea0d38927f15b7336eda0de54bd29e)) - Anakin Childerhose
+- add automated release workflow - ([202b37b](https://github.com/anakin4747/lsts/commit/202b37b706db0a9ad60ddec588c0b2d83e868b47)) - anakin4747r2d2
+#### Features
+- add workflow_dispatch for manual ui releases - ([81c3bf9](https://github.com/anakin4747/lsts/commit/81c3bf926204ee1c2d5077aac760ac77f4f6baa9)) - Anakin Childerhose
+- automatically dedent inline hover expected strings - ([aeb8f68](https://github.com/anakin4747/lsts/commit/aeb8f68beda1905f39b0f21a3d7ab23f57becf2c)) - Anakin Childerhose
+- support inline string comparison in lsts_hover - ([a7bcf1d](https://github.com/anakin4747/lsts/commit/a7bcf1d362dc8728eca6616cf52fa6e8f4cd88df)) - Anakin Childerhose
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) remove init from hover like functions - ([db3b466](https://github.com/anakin4747/lsts/commit/db3b466d8607ddbea4f05d8bac77d3015ef4ecbb)) - Anakin Childerhose
+- add lsts_change - ([36e5500](https://github.com/anakin4747/lsts/commit/36e55007413a558a2ba4ae5ada8cc53e1362cbb1)) - anakin4747r2d2
+- add lsts_diagnostics_none - ([711c843](https://github.com/anakin4747/lsts/commit/711c8434f846c86615bab5231ce246454dbdee8f)) - anakin4747r2d2
+- add _lsts_wait_for_diagnostics and lsts_initialize_capability - ([586f2f2](https://github.com/anakin4747/lsts/commit/586f2f20022601cc00d31dc4f26bf898d182ee36)) - anakin4747r2d2
+- add lsts_check_no_snapshots and fixture file validation - ([febce75](https://github.com/anakin4747/lsts/commit/febce752c68495e2b935eb19176c70f11d553123)) - anakin4747r2d2
+- add env var configuration to fake-ls - ([91525d4](https://github.com/anakin4747/lsts/commit/91525d493a89a7e05f50fd77a053bc7759435c75)) - anakin4747r2d2
+- add lsts_diagnostics for testing server-reported diagnostics - ([c073841](https://github.com/anakin4747/lsts/commit/c073841482678a88303fa11e0c2810e02fc1425e)) - Anakin Childerhose
+- add lsts_add_filter for portable fixture path substitutions - ([6c9dd87](https://github.com/anakin4747/lsts/commit/6c9dd8774122d46a4232e898065372e0edbb7035)) - Anakin Childerhose
+- convert position inputs from 0-based LSP to 1-based editor indexing - ([f233318](https://github.com/anakin4747/lsts/commit/f2333189ea679655ff67e29fd02450b9d13d6b21)) - Anakin Childerhose
+- change position-based functions to accept path:line:character format - ([04d9c5f](https://github.com/anakin4747/lsts/commit/04d9c5f18d9634e35f770d6c25e2bc24a4ac4ace)) - Anakin Childerhose
+- add goto incoming and outgoing calls tests for gopls - ([0b96377](https://github.com/anakin4747/lsts/commit/0b963779548261a567757a2fdf912fe5b73d2ae0)) - Anakin Childerhose
+- add call hierarchy prepare, incoming calls, and outgoing calls - ([caf8ce7](https://github.com/anakin4747/lsts/commit/caf8ce766e45e9dc9bd38a3f52e412ee8ef3e4eb)) - Anakin Childerhose
+- add lint to default make target and don't throw errors if it fails - ([ffa30d5](https://github.com/anakin4747/lsts/commit/ffa30d5d20962baf9cdf9f2f64a41c36120d4c83)) - Anakin Childerhose
+- add lsts_set_langId function to specify the languageId - ([da32d55](https://github.com/anakin4747/lsts/commit/da32d55d7ba3338c3efdfb652f46481754b080e0)) - Anakin Childerhose
+- add lsts_set_root function to set workspaceFolders - ([1e77e7b](https://github.com/anakin4747/lsts/commit/1e77e7bd3310045053247993f938e823f4fdaba8)) - Anakin Childerhose
+- add lsts_set_cmd function to set target language server command - ([561b9f9](https://github.com/anakin4747/lsts/commit/561b9f9bb63a044c8934d046575c57c666c5797e)) - Anakin Childerhose
+- add gopls, pyright, and go to flake devShell - ([a1783e1](https://github.com/anakin4747/lsts/commit/a1783e1ecc82c4251c0b20dcef5d7bc33a9849b5)) - Anakin Childerhose
+- add Go and Python fixture files for gopls and pyright tests - ([eb4c69f](https://github.com/anakin4747/lsts/commit/eb4c69feb0807ce5b171aa55b76b76adaaf1acaf)) - Anakin Childerhose
+- add lsts.bash loader for use with bats load - ([3640af3](https://github.com/anakin4747/lsts/commit/3640af38edc477badcf7f260ff994246a1823a99)) - Anakin Childerhose
+- add hover method helper: lsp_hover handles full prerequisite chain - ([57e1773](https://github.com/anakin4747/lsts/commit/57e1773ace8977548713f5295d5b12ba8a85c217)) - Anakin Childerhose
+- add initialize helper: lsp_initialize performs the handshake - ([3d59099](https://github.com/anakin4747/lsts/commit/3d5909988e9ca303c1fdddcd53d98d8b12dd6a94)) - Anakin Childerhose
+- add lifecycle layer: lsp_start and lsp_stop - ([1d85d02](https://github.com/anakin4747/lsts/commit/1d85d02866d6097be60dccbfec453cf2f12edab9)) - Anakin Childerhose
+- add transport layer: lsp_send, lsp_recv, lsp_request, lsp_notify - ([236af04](https://github.com/anakin4747/lsts/commit/236af0459f55c17152c083b0010f86765c75f118)) - Anakin Childerhose
+- add hover test and sanitize invalid control chars in server responses - ([06f6b07](https://github.com/anakin4747/lsts/commit/06f6b07ace8799502dd37ee57bb606cf5e8f6872)) - Anakin Childerhose
+- add Makefile with default test target - ([fa2a9c1](https://github.com/anakin4747/lsts/commit/fa2a9c14a6356056206270166a0391c8ecfb0ba2)) - Anakin Childerhose
+- add proof-of-concept bats test for LSP initialize via coproc - ([41d94ba](https://github.com/anakin4747/lsts/commit/41d94ba20ec754c9d4bf71d9a797d592fad7b362)) - Anakin Childerhose
+#### Bug Fixes
+- remove cog-bump-release script since its unused - ([a2b57cb](https://github.com/anakin4747/lsts/commit/a2b57cbac9c1078a0ca7a7ab70efd01b2c165680)) - Anakin Childerhose
+- suppress shellcheck SC2016 warning for intentional JSON escape sequences - ([26b0c18](https://github.com/anakin4747/lsts/commit/26b0c18c14d9d0c32afcd8157657ba84bacc017e)) - Anakin Childerhose
+- remove empty CHANGELOG.md and fail workflow on unexpected cog errors - ([49f1750](https://github.com/anakin4747/lsts/commit/49f1750dd09c26429c0486d153e8b54dea231e13)) - Anakin Childerhose
+- use correct changelog template name and check cog exit code in release workflow - ([2d82d8f](https://github.com/anakin4747/lsts/commit/2d82d8fefac5cf26831b470a2f2410929c8dab2d)) - Anakin Childerhose
+- make shellcheck failures propagate - ([57ca53b](https://github.com/anakin4747/lsts/commit/57ca53b3dae1543151a7a28ddb3711322f34d877)) - Anakin Childerhose
+- shellcheck warnings in test files - ([db3efcf](https://github.com/anakin4747/lsts/commit/db3efcf2b33e05a21086fab991f86e62a62de04d)) - Anakin Childerhose
+- replace perl sanitiser with pure jq state machine - ([c4aeb5d](https://github.com/anakin4747/lsts/commit/c4aeb5d767fa93f3213be078f31f58f00ba69d3d)) - Anakin Childerhose
+- sanitise unescaped control chars in JSON strings before parsing - ([1f9ce20](https://github.com/anakin4747/lsts/commit/1f9ce2054d414dc28e53e52f767c2556ad1b70b4)) - Anakin Childerhose
+- add missing trailing newline to go definition and outgoing_calls fixtures - ([2337cd3](https://github.com/anakin4747/lsts/commit/2337cd3b09663a2a1a61adb67d90675225c63db2)) - Anakin Childerhose
+- normalise server responses with jq -c instead of tr - ([baa0129](https://github.com/anakin4747/lsts/commit/baa01295faffa807676070d4b164117fe073e50a)) - Anakin Childerhose
+- add outer timeout to lsts_recv_response - ([9467109](https://github.com/anakin4747/lsts/commit/9467109884d504442ae5c7844c6346028863a2a9)) - Anakin Childerhose
+- send exit notification with null params, not {} - ([f7ab9e9](https://github.com/anakin4747/lsts/commit/f7ab9e99e01aedfec4bc956200d1a4a3a862f10b)) - Anakin Childerhose
+- missing .gitmodules for ./language-server-protocol - ([ca364cd](https://github.com/anakin4747/lsts/commit/ca364cd8f28c735d001865a7c0950415223bbe87)) - Anakin Childerhose
+- Content-Length to use byte count for multibyte UTF-8 bodies - ([6cbfcca](https://github.com/anakin4747/lsts/commit/6cbfcca690685655bef58dc373e1d0f2d60645ea)) - Anakin Childerhose
+- auto-reply to server-to-client requests in lsts_recv_response - ([73dc9c3](https://github.com/anakin4747/lsts/commit/73dc9c3f7c0fe747e84d37f1b34d2812cd251649)) - Anakin Childerhose
+- skip server-to-client requests in lsts_recv_response - ([7458756](https://github.com/anakin4747/lsts/commit/74587563e6df220040fd14ce18b7c141b9df250a)) - Anakin Childerhose
+- remove language_id argument from lsp_hover - ([7428385](https://github.com/anakin4747/lsts/commit/7428385af0c52ae85f31ae91b86156e31401518b)) - Anakin Childerhose
+- remove old lsp_poc.bats (replaced by test/lsts_tests.bats) - ([0b8b133](https://github.com/anakin4747/lsts/commit/0b8b133f95bf4ef63660fc90eb1045a7f8ced378)) - Anakin Childerhose
+- collapse lib/ and methods/ into single-file lsts.bash - ([ae4a41d](https://github.com/anakin4747/lsts/commit/ae4a41d2317b75a5ec4c29d8e729fb03a314fa2d)) - Anakin Childerhose
+- lsp_recv to avoid coproc FD loss in subshells - ([fee77d8](https://github.com/anakin4747/lsts/commit/fee77d8dbb126d2243696857efeb112f8ba99c3c)) - Anakin Childerhose
+#### Revert
+- remove JSON sanitiser for non-conformant servers - ([79498b8](https://github.com/anakin4747/lsts/commit/79498b8e5ea6d4b8ea99b6c2dfd7c72e5ebd4618)) - Anakin Childerhose
+#### Documentation
+- add running tests section to AGENTS.md - ([bce5c9b](https://github.com/anakin4747/lsts/commit/bce5c9b7274a0eb28fff44b3530b90def9d753ab)) - Anakin Childerhose
+- add minimal README - ([747661a](https://github.com/anakin4747/lsts/commit/747661a5136aa8905c39f56f9eea7e97fbd2954e)) - anakin4747r2d2
+- update TODO to reflect fixed bugs and explain non-fixes - ([0ac6d6f](https://github.com/anakin4747/lsts/commit/0ac6d6fff701761e71a3ad7043716888650228b8)) - Anakin Childerhose
+- add missing doc comments and fix inline comment style - ([eb62364](https://github.com/anakin4747/lsts/commit/eb623647b0711116275892b8397f368626439842)) - Anakin Childerhose
+- add code review advice to AGENTS.md - ([3350fd9](https://github.com/anakin4747/lsts/commit/3350fd9942f74d273a855f345d2ffa4b857b9e9a)) - Anakin Childerhose
+- remove TODO.md since there are not current todos - ([a4c5aba](https://github.com/anakin4747/lsts/commit/a4c5abaa67c03717435ba5fe151144b8d16abc80)) - Anakin Childerhose
+- clean up stale and misleading comments - ([0d17b00](https://github.com/anakin4747/lsts/commit/0d17b0096098fff74c7b39ad19a76091efd1eca5)) - Anakin Childerhose
+- document git discipline in AGENTS.md - ([94481ce](https://github.com/anakin4747/lsts/commit/94481ce708d46c4c1ccfce9121356ed5d8a51f3b)) - Anakin Childerhose
+#### Tests
+- fix inline multiline string fixture - ([ef89d76](https://github.com/anakin4747/lsts/commit/ef89d766c2395dce6b40f0169c8425599522f510)) - Anakin Childerhose
+- add lsts_check_no_snapshots tests and teardown_file guard - ([17f46c1](https://github.com/anakin4747/lsts/commit/17f46c1b1f4fe2ff43a1476b067457d6c66cb2ed)) - anakin4747r2d2
+- make lsts_tests.bats the default test suite - ([311f571](https://github.com/anakin4747/lsts/commit/311f5712cc62f4024d4e4eeaab95f38d6cb0998c)) - anakin4747r2d2
+- use env vars to configure fake-ls in simple tests - ([c464ee2](https://github.com/anakin4747/lsts/commit/c464ee2e71799bd603fa38593dd985c5d0d89a32)) - anakin4747r2d2
+- add fake-ls scriptable fake LSP server - ([013315c](https://github.com/anakin4747/lsts/commit/013315cfdb5ff876c4966e5bc1ced82a39f513ef)) - anakin4747r2d2
+- export LC_ALL=C to prevent test hangs - ([47cfee0](https://github.com/anakin4747/lsts/commit/47cfee0d9c395bd63f29b5faaeea262a968cdeba)) - anakin4747r2d2
+- remove dummy snapshot tests from all test files - ([a2f6d51](https://github.com/anakin4747/lsts/commit/a2f6d51871b904d662c6b3f3ee0f5d7af86e8cda)) - Anakin Childerhose
+- update all test files to use path:line:character calling convention - ([85ad91d](https://github.com/anakin4747/lsts/commit/85ad91d1943d79721bb04349eab527834b833eca)) - Anakin Childerhose
+- add lsts_print_test_location to all remaining test files - ([6815b87](https://github.com/anakin4747/lsts/commit/6815b876e87f885f6932864c904aa4fe659c3c76)) - Anakin Childerhose
+- add lsts_print_test_location and use it in kls_tests - ([a42ad43](https://github.com/anakin4747/lsts/commit/a42ad4362f52573fc840649887e69fe9db3d2a59)) - Anakin Childerhose
+- add test for lsts_call_hierarchy_prepare - ([3372010](https://github.com/anakin4747/lsts/commit/33720102f42881f94826ce145bc88d7e17792ace)) - Anakin Childerhose
+- add lua-language-server tests - ([556e5f9](https://github.com/anakin4747/lsts/commit/556e5f9051f8aa509e97bee2e90fbfb925984819)) - Anakin Childerhose
+- add bash-language-server tests and snapshots - ([e90ec59](https://github.com/anakin4747/lsts/commit/e90ec591c561940de700513a432ed2aaba454a4f)) - Anakin Childerhose
+- remove empty kconfig definition snapshot - ([acf67b6](https://github.com/anakin4747/lsts/commit/acf67b64fa8c097bfb7ff9b74a3e4da22cc39240)) - Anakin Childerhose
+- limit kls tests to hover — server only implements hover in practice - ([28eceb9](https://github.com/anakin4747/lsts/commit/28eceb9c0f02f85477542ae36d3b5d98ed38ad0b)) - Anakin Childerhose
+- add lua snapshot fixtures for all tested methods - ([6f83018](https://github.com/anakin4747/lsts/commit/6f83018083b30f2e1240328327e69cf02967f57d)) - Anakin Childerhose
+- add tests for all LSP methods with snapshots - ([ebb653f](https://github.com/anakin4747/lsts/commit/ebb653f44d49570b70613dc0393f096d388a4572)) - Anakin Childerhose
+#### CI
+- replace cog verify with cog check - ([b780ec6](https://github.com/anakin4747/lsts/commit/b780ec6a9de02c4cad9a8060b75634a9bb9ae15e)) - Anakin Childerhose
+- remove args from cog verify - ([4fd048c](https://github.com/anakin4747/lsts/commit/4fd048c13c38ec6cfa79caa5c03c5f440339fe02)) - Anakin Childerhose
+- configure git user before running make - ([635a316](https://github.com/anakin4747/lsts/commit/635a316099a29f5da5d8f2ba400622d2359e5492)) - Anakin Childerhose
+- replace manual tool setup with nix via make - ([722836a](https://github.com/anakin4747/lsts/commit/722836a7662f04dce8b94abd581b216c24d9806d)) - Anakin Childerhose
+- add workflow_dispatch - ([31349df](https://github.com/anakin4747/lsts/commit/31349df35d99ab136053e08a4164f7bd139de330)) - Anakin Childerhose
+- add v before tags in cog.toml - ([c67900b](https://github.com/anakin4747/lsts/commit/c67900be5c404cf1d2c0b386c20ed2016b79b96b)) - Anakin Childerhose
+- enforce conventional commits on pull requests - ([d96a069](https://github.com/anakin4747/lsts/commit/d96a069b26b7d66271390722abdb45060c05275e)) - anakin4747r2d2
+- add GitHub Actions workflow - ([58a2e84](https://github.com/anakin4747/lsts/commit/58a2e8431a15ce60627174346586919734e2a185)) - anakin4747r2d2
+#### Refactoring
+- move release logic to scripts/release - ([1795adc](https://github.com/anakin4747/lsts/commit/1795adcfe968f5a904403ba542628944465ab9f4)) - Anakin Childerhose
+- breakup dedent to smaller functions - ([4c4e032](https://github.com/anakin4747/lsts/commit/4c4e032834c0b749655623cb598adf8aa223679e)) - Anakin Childerhose
+- factor cog bump logic into scripts/cog-bump-release - ([1a5ff51](https://github.com/anakin4747/lsts/commit/1a5ff51b2ea739b072c7e9388a1ce8c8a3e9a787)) - Anakin Childerhose
+- extract _lsts_reply_to_request to remove duplicate auto-reply logic - ([dda6ae0](https://github.com/anakin4747/lsts/commit/dda6ae0c6eb0c72d47ef5918a3688b773f42209d)) - Anakin Childerhose
+- replace hardcoded workspace URIs with $LSTS_ROOT placeholder in fixtures - ([52feafa](https://github.com/anakin4747/lsts/commit/52feafab8bd9377335eb90c40d120078e5a3cd13)) - Anakin Childerhose
+- normalize workspace root URI in responses before fixture diff - ([bfac953](https://github.com/anakin4747/lsts/commit/bfac953a505b63adaa7e85df7b006ac2200d728b)) - Anakin Childerhose
+- consolidate local declarations onto one line in lsts_references and lsts_formatting - ([fcc84d6](https://github.com/anakin4747/lsts/commit/fcc84d653dae7a8433098421d1826b6e863dfb87)) - Anakin Childerhose
+- rename snapshot-file param to fixture-path throughout - ([dfc35b4](https://github.com/anakin4747/lsts/commit/dfc35b4248dec1c5031e800ad59ee901a770c11f)) - Anakin Childerhose
+- eliminate duplication via _lsts_snapshot_or_diff and _lsts_doc_request - ([5603c52](https://github.com/anakin4747/lsts/commit/5603c52ce3b6490c8cb74a9359667b85ace1edde)) - Anakin Childerhose
+- extract lsts_open helper and add all LSP method functions - ([e31e002](https://github.com/anakin4747/lsts/commit/e31e00231b4bb1f17a7e14eb43e9fc36993feb2c)) - Anakin Childerhose
+- switch to new initialize method - ([c6b309c](https://github.com/anakin4747/lsts/commit/c6b309cfc661437ba75414e193e1924c23faa103)) - Anakin Childerhose
+- move lsts.bash to lsts - ([b35cc2d](https://github.com/anakin4747/lsts/commit/b35cc2d70f0ca52bd0c7e0a6c3342ab1d9cca792)) - Anakin Childerhose
+- simplify lsp_hover - ([875fa90](https://github.com/anakin4747/lsts/commit/875fa9007c69443a9b6c896e1bfcb5a43135fc85)) - Anakin Childerhose
+- replace all LSP_ variables with LSTS_ - ([f848555](https://github.com/anakin4747/lsts/commit/f8485554cea4a57fad46fd1c7043ce77bdd58054)) - Anakin Childerhose
+#### Chores
+- put PHONY above each target instead of a list at the top - ([bf01f30](https://github.com/anakin4747/lsts/commit/bf01f30f53d8fab0c2c812f372b22f74e94b1ec4)) - Anakin Childerhose
+- apply bash-syntax skill to cog-bump-release script - ([aebb308](https://github.com/anakin4747/lsts/commit/aebb308834887e8bf75e859fa2cb8041f6443792)) - Anakin Childerhose
+- mv tests/fake-ls-fixtures tests/fixtures - ([20327e2](https://github.com/anakin4747/lsts/commit/20327e2d8b7cec19e138a939afbd77fdd6ba0ec5)) - Anakin Childerhose
+- remove lsts_add_filter since its unused - ([471c82b](https://github.com/anakin4747/lsts/commit/471c82b6b52696ea28b8a33d5153ffc380dd4650)) - Anakin Childerhose
+- quiet cog verify output in Makefile - ([b59dca9](https://github.com/anakin4747/lsts/commit/b59dca90875dff7d6893b3b3a262a7393985c51c)) - Anakin Childerhose
+- remove unused tests and fixtures - ([3929226](https://github.com/anakin4747/lsts/commit/392922672dacf8f65810094c79dc9b41ffa60d8e)) - Anakin Childerhose
+- remove old TODOs from TODO.md - ([feb1296](https://github.com/anakin4747/lsts/commit/feb1296851e98b0e264b5e02524343d369436ec1)) - Anakin Childerhose
+- add cog verify on last commit to default make target - ([4207ffb](https://github.com/anakin4747/lsts/commit/4207ffbc3fc9039c76c55e95176b89a19e0278a8)) - Anakin Childerhose
+- add empty changelog - ([efa68f4](https://github.com/anakin4747/lsts/commit/efa68f464b1fba6a790c8f12e8572155bbb30e3a)) - Anakin Childerhose
+- add cd to allowed conventional commit types - ([fd9e802](https://github.com/anakin4747/lsts/commit/fd9e802d941b1593fef7087ab150c9984a66f2b9)) - anakin4747r2d2
+- add cocogitto for conventional commits and changelog generation - ([b12ba05](https://github.com/anakin4747/lsts/commit/b12ba05cae0e96b04130b31dee9151934823b556)) - anakin4747r2d2
+- add nix-command and flakes to nix develop - ([46274e6](https://github.com/anakin4747/lsts/commit/46274e64bdfa2e50a3581365bc8b0b1b98454b91)) - anakin4747r2d2
+- update test positions to 1-based editor indexing - ([0ae226e](https://github.com/anakin4747/lsts/commit/0ae226ed126bded39fc50544d03e259ccc5cd5d5)) - Anakin Childerhose
+- update snapchot warning colouring - ([d4b534c](https://github.com/anakin4747/lsts/commit/d4b534cae86e55984b6aa129b726de950a8b0984)) - Anakin Childerhose
+- prefix result lines with green SUCCESS or red FAILURE instead of coloured name - ([c9ebbe5](https://github.com/anakin4747/lsts/commit/c9ebbe58d5650228f931523a821082a7de0e18d8)) - Anakin Childerhose
+- replace pass/fail symbols with green/red coloured test name - ([8036ab6](https://github.com/anakin4747/lsts/commit/8036ab6564d6b58b01c07e7a3bac7c2818337682)) - Anakin Childerhose
+- add GPL-2.0-only LICENSE and attribute bats-core MIT copyright in lsts-format-pretty - ([c1f424b](https://github.com/anakin4747/lsts/commit/c1f424bf93df211cb9f884cffda1e5ed807edc73)) - Anakin Childerhose
+- remove unused prefix_buffer_with from lsts-format-pretty - ([d11d0e8](https://github.com/anakin4747/lsts/commit/d11d0e841c3a2ba72d833d55b6c40dc97f9bf2bc)) - Anakin Childerhose
+- remove lsts_print_test_location now that formatter handles file:line output - ([7872377](https://github.com/anakin4747/lsts/commit/7872377aee6a62c9d52d3008a3c7f858caa81b8e)) - Anakin Childerhose
+- add lsts-format-pretty custom bats formatter with file:line on result lines - ([6e6b9f5](https://github.com/anakin4747/lsts/commit/6e6b9f5482e90e22b03d2b50dcabb0931c926ec5)) - Anakin Childerhose
+- omit description from lsts_print_test_location output - ([a25563f](https://github.com/anakin4747/lsts/commit/a25563f792f76454733e6f90649029bc808ea886)) - Anakin Childerhose
+- add pyright tests for completion, document_symbols, references, signature_help, document_highlight, rename - ([c25ceed](https://github.com/anakin4747/lsts/commit/c25ceededd745ded21ad08e1184f3c893293f50c)) - Anakin Childerhose
+- add typescript-language-server tests and snapshots - ([9f227d5](https://github.com/anakin4747/lsts/commit/9f227d55e4b3c349d459814b3d9a019ae5e67cae)) - Anakin Childerhose
+- add nil (Nix language server) tests and snapshots - ([becec32](https://github.com/anakin4747/lsts/commit/becec325c34be6425074ed229b412ee6882425a9)) - Anakin Childerhose
+- update go snapshots with current gopls output - ([bbd883f](https://github.com/anakin4747/lsts/commit/bbd883f99c2e0d63bcb69ef112dbda221614eaba)) - Anakin Childerhose
+- add bash-language-server, nil, and typescript-language-server to devshell - ([4318c64](https://github.com/anakin4747/lsts/commit/4318c6487fef53e474487deb325e9c9d48b08357)) - Anakin Childerhose
+- add pyright snapshot fixtures for all tested methods - ([d5dd883](https://github.com/anakin4747/lsts/commit/d5dd883dcf74cb2feb101f8996ef94232a0f7fe2)) - Anakin Childerhose
+- add lua-language-server to devshell - ([a906239](https://github.com/anakin4747/lsts/commit/a90623932e39307af97db244275155c641232629)) - Anakin Childerhose
+- disable sonar-scanner JRE provisioning on NixOS - ([ab8c789](https://github.com/anakin4747/lsts/commit/ab8c7894c50dfde5b87271d07fd9e93ffdc3052c)) - Anakin Childerhose
+- sed 's/lsp_/lsts_/g' - ([13bd472](https://github.com/anakin4747/lsts/commit/13bd472151500d0cfc38ec494ef2e33b31772d95)) - Anakin Childerhose
+- replace all tabs with spaces - ([3e3145f](https://github.com/anakin4747/lsts/commit/3e3145f0baa674ea51b8d4609f69b0440ee53778)) - Anakin Childerhose
+- remove excessive ai generated comments - ([33a98d2](https://github.com/anakin4747/lsts/commit/33a98d2b6f5dce0eca68ebc3e2c5a43b59a202b2)) - Anakin Childerhose
+- add language-server-protocol as a submodule - ([81d3414](https://github.com/anakin4747/lsts/commit/81d3414e2e6dbc4ef4478f7192678aab1fac4316)) - Anakin Childerhose
+- add guards for mandetory lsts settings - ([5c89ac2](https://github.com/anakin4747/lsts/commit/5c89ac29cc030c941b82a9c9529e4bd5a239820b)) - Anakin Childerhose
+- split tests into separate files for separate language server - ([ddeda78](https://github.com/anakin4747/lsts/commit/ddeda780502ffda36d7e787df71cb1d17f164146)) - Anakin Childerhose
+- move lsp_poc.bats to test/lsts_tests.bats - ([950aad9](https://github.com/anakin4747/lsts/commit/950aad9f170cd2159e22bc11d6fe4a940b1916b8)) - Anakin Childerhose
+- update Makefile to run inside nix develop and export LSP_CMD/LSTS_ROOT - ([7934b1e](https://github.com/anakin4747/lsts/commit/7934b1e2388805e431046f43e4999b4c490ea860)) - Anakin Childerhose
+- rewrite lsp_poc.bats as library consumer with fixture and update Makefile - ([29efd41](https://github.com/anakin4747/lsts/commit/29efd41ccb3cc41b9d3ad3921090fe3be5a330de)) - Anakin Childerhose
+- add nix flake with bats, jq, and kconfig-language-server - ([be1bcce](https://github.com/anakin4747/lsts/commit/be1bcce6396eaae08c55e1e8159ecd2ce1fc1456)) - Anakin Childerhose
+- add initial AGENTS.md - ([b89b802](https://github.com/anakin4747/lsts/commit/b89b8029916458def03b43ff6e620ecd9aa9a793)) - Anakin Childerhose
+
+- - -
+
+Changelog generated by [cocogitto](https://github.com/cocogitto/cocogitto).
