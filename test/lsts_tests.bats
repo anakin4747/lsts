@@ -70,6 +70,20 @@ teardown_file() {
     printf '%s' "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' > /dev/null
 }
 
+@test "lsts_send and lsts_recv auto-attach to running daemon" {
+    export FAKE_LS_RESPOND_initialize='{"capabilities":{}}'
+    _start_fake_ls
+
+    # Wipe connection state — this is what a fresh @test subprocess sees
+    unset LSTS_WRITE_FD LSTS_READ_FD _LSTS_ATTACHED
+
+    # These should auto-attach to the running daemon's named pipes
+    lsts_request "initialize" \
+        '{"processId":null,"rootUri":"file:///tmp","rootPath":"/tmp","capabilities":{}}'
+    lsts_recv_response
+    printf '%s' "$LSTS_RESPONSE" | jq -e '.result.capabilities | objects' > /dev/null
+}
+
 # ---------------------------------------------------------------------------
 # lsts_initialize
 # ---------------------------------------------------------------------------

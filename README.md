@@ -6,6 +6,10 @@ A bash library for testing Language Server Protocol (LSP) servers with [bats](ht
 
 Source `lsts` in a bats test file, configure the language server, then call the provided helpers.
 
+### Shared daemon (fast — recommended)
+
+The server starts once in `setup_file` and stops in `teardown_file`. Each `@test` automatically attaches to its named pipes on first use — no per-test setup needed.
+
 ```bash
 #!/usr/bin/env bats
 
@@ -15,18 +19,27 @@ lsts_set_cmd "bash-language-server start"
 lsts_set_root "$(dirname "$BATS_TEST_FILENAME")/fixtures/bash"
 lsts_set_langId "shellscript"
 
-setup()    { lsts_start; }
-teardown() { lsts_stop; }
+setup_file() { lsts_start; lsts_initialize; }
+teardown_file() { lsts_stop; }
 
 @test "hover returns documentation" {
-    lsts_initialize
     lsts_hover "main.sh:3:5" "hover.rpc.json"
 }
 
 @test "multiple requests after a single initialize" {
-    lsts_initialize
     lsts_hover "main.sh:3:5" "hover_first.rpc.json"
     lsts_hover "main.sh:3:5" "hover_second.rpc.json"
+}
+```
+
+### Per-test isolation (fresh server each test)
+
+```bash
+setup()    { lsts_start; lsts_initialize; }
+teardown() { lsts_stop; }
+
+@test "hover returns documentation" {
+    lsts_hover "main.sh:3:5" "hover.rpc.json"
 }
 ```
 

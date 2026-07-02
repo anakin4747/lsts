@@ -38,14 +38,28 @@ lsts_set_langId() {
 }
 
 _LSTS_ID=0
+_LSTS_ATTACHED=0
 
 # Placeholder substituted for the workspace root URI (file://$LSTS_ROOT) in
 # fixture files, making snapshots portable across machines and checkout paths.
 LSTS_ROOT_PLACEHOLDER="file://\$LSTS_ROOT"
 
+# _lsts_attach
+# Open the running daemon's named pipe file descriptors in the current process.
+_lsts_attach() {
+    (( _LSTS_ATTACHED )) && return 0
+    local in_pipe out_pipe
+    in_pipe="$(cat /tmp/lsts_daemon_in 2>/dev/null)" || return 1
+    out_pipe="$(cat /tmp/lsts_daemon_out 2>/dev/null)" || return 1
+    exec {LSTS_WRITE_FD}> "$in_pipe"
+    exec {LSTS_READ_FD}< "$out_pipe"
+    _LSTS_ATTACHED=1
+}
+
 # lsts_send <body>
 # Write a JSON-RPC message with a Content-Length header to the language server.
 lsts_send() {
+    (( _LSTS_ATTACHED )) || _lsts_attach || return 1
     local body="$1"
     local len
     len="$(printf '%s' "$body" | wc -c)"
@@ -55,6 +69,7 @@ lsts_send() {
 # lsts_recv
 # Read one JSON-RPC message from the language server into LSTS_RESPONSE.
 lsts_recv() {
+    (( _LSTS_ATTACHED )) || _lsts_attach || return 1
     local line content_length=0 raw
 
     while IFS= read -r -t "${LSTS_TIMEOUT:-10}" line <&"$LSTS_READ_FD"; do
@@ -120,7 +135,8 @@ lsts_notify() {
 }
 
 # lsts_start
-# Start the language server as a coprocess and open read/write file descriptors.
+# Start the language server as a background daemon with named pipes.
+# Idempotent — if the daemon is already running, just attach to its pipes.
 lsts_start() {
     : "${LSTS_CMD:?language server command not set. use lsts_set_cmd to set the command to start the target language server}"
     : "${LSTS_ROOT:?root directory not set. use lsts_set_root to set the root directory}"
@@ -128,17 +144,51 @@ lsts_start() {
 
     cd "$LSTS_ROOT" || return 1
 
-    coproc LSTS { ${LSTS_CMD}; }
-    LSTS_READ_FD=${LSTS[0]}
-    LSTS_WRITE_FD=${LSTS[1]}
+    # If daemon already running, just attach
+    if [[ -f /tmp/lsts_daemon_pid ]] && kill -0 "$(</tmp/lsts_daemon_pid)" 2>/dev/null; then
+        _lsts_attach
+        return
+    fi
+
+    # Start daemon with named pipes
+    local tmpdir
+    tmpdir="$(mktemp -d /tmp/lsts.XXXXXX)"
+    mkfifo "$tmpdir/in" "$tmpdir/out"
+
+    $LSTS_CMD < "$tmpdir/in" > "$tmpdir/out" &
+    LSTS_PID=$!
+
+    # Hold pipes open so the server doesn't get EOF / SIGPIPE between tests
+    ( sleep infinity <> "$tmpdir/in" ) &
+    local holder=$!
+    ( sleep infinity <> "$tmpdir/out" ) &
+    local oholder=$!
+
+    echo "$LSTS_PID"  > /tmp/lsts_daemon_pid
+    echo "$holder"    > /tmp/lsts_daemon_holder
+    echo "$oholder"   > /tmp/lsts_daemon_oholder
+    echo "$tmpdir/in" > /tmp/lsts_daemon_in
+    echo "$tmpdir/out"> /tmp/lsts_daemon_out
+    echo "$tmpdir"    > /tmp/lsts_daemon_tmpdir
+
+    _lsts_attach
 }
 
 # lsts_stop
-# Gracefully shut down the language server and reap the coprocess.
+# Gracefully shut down the language server daemon and clean up named pipes.
 lsts_stop() {
     lsts_notify "exit" "null" 2>/dev/null || true
-    kill "${LSTS_PID:-}" 2>/dev/null || true
-    wait "${LSTS_PID:-}" 2>/dev/null || true
+    local pid holder oholder tmpdir
+    pid=$(cat /tmp/lsts_daemon_pid 2>/dev/null || true)
+    holder=$(cat /tmp/lsts_daemon_holder 2>/dev/null || true)
+    oholder=$(cat /tmp/lsts_daemon_oholder 2>/dev/null || true)
+    tmpdir=$(cat /tmp/lsts_daemon_tmpdir 2>/dev/null || true)
+    kill "$oholder" 2>/dev/null || true
+    kill "$holder" 2>/dev/null || true
+    kill "$pid" 2>/dev/null || true
+    wait "$pid" 2>/dev/null || true
+    rm -rf "$tmpdir" /tmp/lsts_daemon_* 2>/dev/null || true
+    _LSTS_ATTACHED=0
 }
 
 # lsts_initialize
