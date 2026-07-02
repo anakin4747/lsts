@@ -20,18 +20,23 @@ teardown() { lsts_stop; }
 
 @test "hover returns documentation" {
     lsts_initialize
-    lsts_open "main.sh"
     lsts_hover "main.sh:3:5" "hover.rpc.json"
 }
 
-Each `*.rpc.json` fixture contains the expected LSP response. Paths inside fixtures may use `$LSTS_ROOT` and standard environment variables; they are expanded at comparison time.
+@test "multiple requests after a single initialize" {
+    lsts_initialize
+    lsts_hover "main.sh:3:5" "hover_first.rpc.json"
+    lsts_hover "main.sh:3:5" "hover_second.rpc.json"
+}
+```
+
+Each `*.rpc.json` fixture contains the expected full JSON-RPC response. Paths inside fixtures may use `$LSTS_ROOT` and standard environment variables; they are expanded at comparison time.
 
 When the second argument is not a file path, `lsts_hover` compares against the inline text extracted from `result.contents`:
 
 ```bash
 @test "hover shows expected text" {
     lsts_initialize
-    lsts_open "main.sh"
     lsts_hover "main.sh:3:5" "expected hover text"
 }
 ```
